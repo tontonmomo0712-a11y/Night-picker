@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#080c18"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Night Picker"><title>Night Picker | 星空・夜景スポット抽選と星座図鑑</title>
+<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#080c18"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Night Picker"><title>Night Picker v10 | 星空・夜景と88星座図鑑</title>
 <style>
 .slideRow{display:flex;align-items:center;gap:12px}.slideRow input{flex:1;min-width:0;accent-color:#a9ccff;cursor:pointer}.slideRow strong{min-width:72px;font-size:13px;color:#c5dcff} .constTools{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:14px 0}.constTools button{padding:9px 12px;border:1px solid #456185;border-radius:10px;background:#142840;color:#e3eeff;cursor:pointer}.constTools button.active{background:#4467ac;color:white}.constTools select,.constTools input{min-width:0;flex:1;padding:9px;background:#111d33;color:white;border:1px solid #3f5472;border-radius:9px}.constHero{position:relative}.constFigure{position:absolute;inset:0;pointer-events:none;opacity:.66;transition:.2s}.constLegend{font-size:11px;color:#acc3e7;margin:5px 0 12px}.constArt{position:relative}.constArt svg{display:block}.constArticle p{line-height:1.95;font-size:14px}.constArticle h4{margin:19px 0 7px;color:#b5d8ff;font-size:16px}.constArticle{max-width:850px}.sourcesNotes a{color:#a6d7ff}
 
@@ -9,6 +9,28 @@
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 .weatherEntry,.item{content-visibility:auto;contain-intrinsic-size:auto 72px}
 button,a{touch-action:manipulation}
+
+/* v10: responsive constellation encyclopaedia */
+.constBrowse{margin:14px 0 6px;padding:12px;background:#101c30;border:1px solid #324862;border-radius:15px}
+.constBrowseLabel{color:#b8cdeb;font-weight:700;font-size:12px;margin:0 0 9px}
+.constFilters{display:flex;align-items:center;gap:7px;overflow-x:auto;scrollbar-width:thin;-webkit-overflow-scrolling:touch;padding:0 0 7px}
+.constFilters button{flex:0 0 auto;border:1px solid #415d7b;border-radius:99px;padding:8px 12px;color:#cee1ff;background:#162743;min-height:37px;font-size:12px;white-space:nowrap}
+.constFilters button.active{background:#9dc5fc;color:#0a1830;border-color:#b2daff;font-weight:800}
+#constFilterCount{font-size:12px;color:#9fb8d8;margin-top:3px}
+.constPills{display:flex;flex-wrap:wrap;gap:7px;margin:12px 0 14px}
+.constPills span{display:inline-block;border:1px solid #375473;background:#183050;color:#dcecff;padding:6px 10px;border-radius:99px;font-size:11px}
+.constFindSteps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin:15px 0}
+.constFindSteps div{padding:12px;background:#102038;border:1px solid #35506f;border-radius:14px;font-size:13px;line-height:1.7}
+.constFindSteps strong{display:block;color:#b7d8ff;font-size:11px;letter-spacing:.05em;margin-bottom:4px}
+.constRelations{display:flex;gap:8px;flex-wrap:wrap;margin:9px 0 18px}
+.constRelations button{background:#203c60;color:#daedff;border:1px solid #52739e;border-radius:11px;padding:9px 11px;font-size:13px}
+.studyLinkPanel{margin:15px 0;padding:14px;border:1px solid #395975;border-radius:14px;background:linear-gradient(135deg,#142943,#102035)}
+.studyLinkPanel b{display:block;margin-bottom:5px;font-size:14px}
+.studyLinkPanel p{margin:6px 0 11px;font-size:12px;line-height:1.8;color:#afc4df}
+.studyLinkPanel a{display:inline-block;background:#d0e4ff;border-radius:10px;color:#0b213f;font-weight:800;text-decoration:none;padding:10px 12px;font-size:12px;margin:0 8px 7px 0}
+.constArticle{overflow-wrap:anywhere}.constArticle details{margin-top:15px;border:1px solid #37506e;border-radius:13px;padding:12px;background:#12223a}
+.constArticle details summary{font-weight:700;font-size:13px;cursor:pointer;color:#b9d9ff}
+@media(max-width:620px){.constFindSteps{grid-template-columns:1fr}.constTools{gap:7px}.constTools input{flex:1 1 100%}.constTools select{flex:1 1 100%}#constellation{padding:14px!important}.constArticle p{font-size:13.5px;line-height:1.85}.studyLinkPanel a{display:block;text-align:center}}
 </style>
 <style>
 .weatherGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(218px,1fr));gap:11px;margin:14px 0}
@@ -54,7 +76,10 @@ window.addEventListener('error',function(ev){
   <p class="hint">評価は代表地点の予測雲量・降水確率・風速から計算した参考指数です。各地方の全域を表すものではありません。街明かり、山の雲・霧、月齢、実際の現地天候は別途確認してください。遠い日付は予報が未提供です。</p>
   <p class="src">予報データ：<a href="https://open-meteo.com/en/docs" target="_blank" rel="noopener noreferrer">Open-Meteo（時間別予報）↗</a>／気象庁：<a href="https://www.jma.go.jp/bosai/forecast/" target="_blank" rel="noopener noreferrer">最新の天気予報↗</a></p>
 </div>
-<div class="panel" style="margin-top:15px;box-shadow:none"><div style="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap"><div><h2 class="sectionTitle">🌠 星座プラネタリウム図鑑・神話ガチャ</h2><p class="subtle">日本の中緯度で観測しやすい季節から抽選。星座のイラスト・星の特徴・周囲の星座・神話・宇宙の雑学を解説します。</p></div><button id="nextConst" class="smallbtn">🎲 ほかの星座を観る</button></div><div class="constTools"><input id="constSearch" placeholder="星座名を検索（全88星座）" aria-label="星座名を検索"><select id="constSelect" aria-label="星座を選ぶ"></select><button id="showAllConst">全天88星座から抽選</button></div><div id="constellation" style="border:1px solid #344765;border-radius:17px;padding:20px;background:linear-gradient(130deg,#172844,#15162c)"></div><p class="hint">※季節と方角は目安であり、観測地・観測時刻に依存します。神話には複数の異伝があります。模式図は観測用の精密星図ではありません。歴史的星座絵はオンライン表示で、図版ごとの利用条件は出典をご確認ください。</p></div>
+<div class="panel" style="margin-top:15px;box-shadow:none"><div style="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap"><div><h2 class="sectionTitle">🌠 星座プラネタリウム図鑑・神話ガチャ</h2><p class="subtle">88星座を季節・北天/南天・黄道十二星座などから探せます。星座の絵、主な星、神話、近隣の星座、観望ガイドを解説します。</p></div><button id="nextConst" class="smallbtn">🎲 ほかの星座を観る</button></div><div class="constBrowse" aria-label="星座の分類から探す"><p class="constBrowseLabel">🔎 星座をテーマから探す</p><div class="constFilters" id="constFilters" role="group" aria-label="星座の分類">
+<button type="button" data-cat="season" class="active">🌙 今夜の季節</button><button type="button" data-cat="all">全天88星座</button><button type="button" data-cat="春">🌸 春</button><button type="button" data-cat="夏">🌻 夏</button><button type="button" data-cat="秋">🍁 秋</button><button type="button" data-cat="冬">❄️ 冬</button><button type="button" data-cat="北天">🧭 北天寄り</button><button type="button" data-cat="南天">🌏 南天寄り</button><button type="button" data-cat="zodiac">♈ 黄道十二星座</button><button type="button" data-cat="jp">国内で観測する</button><button type="button" data-cat="difficult">日本では観測困難</button>
+</div><div id="constFilterCount" aria-live="polite">季節の星座を抽選します</div></div>
+<div class="constTools"><input id="constSearch" placeholder="名前から探す（全88星座）" aria-label="星座名を検索"><select id="constSelect" aria-label="星座を選ぶ"></select><button id="showAllConst" type="button">🎲 条件内から抽選</button></div><div id="constellation" style="border:1px solid #344765;border-radius:17px;padding:20px;background:linear-gradient(130deg,#172844,#15162c)"></div><p class="hint">※季節と方角は目安であり、観測地・観測時刻に依存します。神話には複数の異伝があります。模式図は観測用の精密星図ではありません。歴史的星座絵はオンライン表示で、図版ごとの利用条件は出典をご確認ください。</p></div>
 <div class="panel" style="margin-top:15px;box-shadow:none"><h2 class="sectionTitle">☄️ 彗星・突発天文現象の最新情報</h2><p class="detail">彗星の明るさ、観望可能時間、突然発生する天文現象は予報が変わります。このオフラインアプリではリアルタイムの彗星情報を自動取得しないため、「今日見える」とは断定しません。下記の専門サイトで最新情報を確認できます。</p><p class="src"><a href="https://www.nao.ac.jp/astro/sky/" target="_blank" rel="noopener">国立天文台・ほしぞら情報 ↗</a>　/　<a href="https://www.astroarts.co.jp/" target="_blank" rel="noopener">アストロアーツ ↗</a>　/　<a href="https://cobs.si/" target="_blank" rel="noopener">COBS（彗星観測データ） ↗</a></p></div>
 <div class="panel" style="margin-top:15px;box-shadow:none"><h2 class="sectionTitle">🔭 観測アドバイス</h2><div id="observingAdvice" class="detail"></div><p class="src"><a href="https://www.nao.ac.jp/astro/sky/" target="_blank" rel="noopener">国立天文台</a> ・ <a href="https://www.amsmeteors.org/calendar/" target="_blank" rel="noopener">流星群カレンダー（AMS）</a></p></div></div></section>
 <p class="foot">天文解説参考：<a href="https://www.nao.ac.jp/news/blog/2022/20220809-constellation.html" target="_blank">国立天文台・88星座</a> ／ <a href="https://www.iau.org/IAU/IAU/Astronomy-FAQs/Constellations.aspx" target="_blank">国際天文学連合・星座の定義</a> ／ <a href="https://eco.mtk.nao.ac.jp/koyomi/faq/stars.html" target="_blank">国立天文台・主な恒星</a>。<br>参考情報：<a href="https://www.youtube.com/watch?v=2HHcKw8MHKI" target="_blank">関東の星景スポット紹介動画</a> ／ <a href="https://www.youtube.com/watch?v=-14zfN74GT8" target="_blank">石垣島15か所現地検証</a> ／ <a href="https://cocohoshi.humanity-japan.jp/columns/stargazing-spots.html" target="_blank">全国星見スポットガイド</a> ／ <a href="https://www.nao.ac.jp/astro/sky/" target="_blank">国立天文台</a>。追加候補には未検証の地域候補も含みます。SNS投稿の網羅収集や全候補の現地検証は行っていません。</p><p class="foot">※追加スポットの所要時間は都道府県の代表点による粗い参考値です。正確な経路や到着地点を示すものではありません。<br>※所要時間は地球上の直線距離に道路補正をかけた参考値（実際の経路検索ではありません）。遠距離のフェリー・航空・島しょ部は誤差が大きくなります。施設の営業時間、夜間開放、交通規制、天気、安全は事前に確認してください。</p></main>
@@ -206,21 +231,109 @@ function historicalArtPanel(x){
  };
  return area;
 }
+
+// v10 curated encyclopaedia metadata and editorial guide. Astronomical categories are approximate, not ephemerides.
+const zodiacV10=new Set(['おひつじ座','おうし座','ふたご座','かに座','しし座','おとめ座','てんびん座','さそり座','いて座','やぎ座','みずがめ座','うお座']);
+const northernV10=new Set(['アンドロメダ座','おおぐま座','こぐま座','うしかい座','かみのけ座','カシオペヤ座','ケフェウス座','きりん座','ぎょしゃ座','こじし座','こと座','こぎつね座','こうま座','さんかく座','はくちょう座','ヘルクレス座','ペガスス座','ペルセウス座','やまねこ座','りゅう座','りょうけん座','かんむり座','とかげ座','や座','いるか座','ふたご座','おおいぬ座','オリオン座','わし座','へびつかい座']);
+const southernV10=new Set(['インディアン座','うさぎ座','うみへび座','おおかみ座','がか座','かじき座','カメレオン座','きょしちょう座','くじゃく座','ケンタウルス座','けんびきょう座','コップ座','コンパス座','さいだん座','じょうぎ座','ちょうこくぐ座','ちょうこくしつ座','つる座','テーブルさん座','とけい座','とびうお座','とも座','はえ座','はちぶんぎ座','はと座','ふうちょう座','ほ座','ぼうえんきょう座','ほうおう座','ポンプ座','みずへび座','みなみじゅうじ座','みなみのうお座','みなみのかんむり座','みなみのさんかく座','やぎ座','りゅうこつ座','レチクル座','ろ座','ろくぶんぎ座','エリダヌス座','おとめ座','てんびん座','さそり座','いて座','くじら座']);
+const difficultJapanV10=new Set(['はちぶんぎ座','ふうちょう座','カメレオン座','テーブルさん座','みずへび座','きょしちょう座','はえ座','とびうお座','かじき座','くじゃく座']);
+const constLinksV10={
+ 'オリオン座':'https://www.study-style.com/seiza/Ori.html',
+ 'アンドロメダ座':'https://www.study-style.com/seiza/And.html',
+ 'カシオペヤ座':'https://www.study-style.com/seiza/Cas.html',
+ 'ペガスス座':'https://www.study-style.com/seiza/Peg.html',
+ 'ペルセウス座':'https://www.study-style.com/seiza/Per.html'
+};
+const seasonalPagesV10={'春':'https://www.study-style.com/seiza/spring.html','夏':'https://www.study-style.com/seiza/summer.html','秋':'https://www.study-style.com/seiza/autumn.html','冬':'https://www.study-style.com/seiza/winter.html'};
+const constellationExtrasV10={
+ 'オリオン座':{point:'三つ星の並びが一つの直線に見えるのが大きな特徴です。ベテルギウスは赤色超巨星、リゲルは青白い超巨星で、同じ星座の中でも星の色と進化段階が異なることを比較できます。',relation:'オリオン座の三つ星を延ばすと、片方におうし座のアルデバラン、もう片方にはおおいぬ座のシリウスが見つかります。冬の大三角の一角もこの星座にあります。',story:'オリオン座流星群の放射点はオリオン付近ですが、流れ星そのものがオリオン座の恒星から飛び出すわけではありません。流星は地球大気へ飛び込む小さな粒子が発光した現象です。',find:['南東から南の空で明るい三つ星を探す','赤いベテルギウスと青白いリゲルを確認する','三つ星の下の小三つ星にM42を探す'],relations:['おうし座','おおいぬ座','こいぬ座','さそり座']},
+ 'アンドロメダ座':{point:'秋の大四辺形の一角、アルフェラッツから伸びる星の列が目印。淡く広がったM31アンドロメダ銀河は、よく晴れた暗い空で見てみたい代表的な銀河です。',relation:'ペガスス座の大四辺形、カシオペヤ座のW、ペルセウス座の並びを結ぶと、秋の夜空の神話上の王家が一つの大きな舞台になります。',story:'M31の光は約250万年も宇宙を旅して地球へ届きます。双眼鏡でその淡い光を見ることは、数百万年前の銀河を眺めることでもあります。',find:['秋の大四辺形を見つける','その一角から東へ延びる星列をたどる','月明かりの少ない夜にM31を探す'],relations:['ペガスス座','カシオペヤ座','ペルセウス座','ケフェウス座']},
+ 'カシオペヤ座':{point:'五つの明るい星がW字、向きによってM字に見える星座。北極星を挟み、北斗七星とほぼ反対側の目印にもなります。',relation:'ケフェウス座の王、アンドロメダ座の姫、ペルセウス座の英雄とともに王家の物語を構成。W字からペルセウス座へ視線を移すと二重星団h-χを探せます。',story:'地球の自転で星座は北極星の周囲を回るように見えます。WとMに姿を変えること自体が地球の回転を確かめる格好の観察です。',find:['北の空で明るいW字を探す','近くのケフェウス座の家形を確認','双眼鏡でペルセウス座との間の二重星団を探す'],relations:['ケフェウス座','ペルセウス座','アンドロメダ座','おおぐま座']},
+ 'ペガスス座':{point:'胴体の「秋の大四辺形」が大きな目印です。四辺形はペガスス座とアンドロメダ座にまたがる明るい星で描かれます。',relation:'ペガスス座を起点にアンドロメダ座、ペルセウス座、カシオペヤ座へと目線を動かすと、星空の上で一つの物語を追えます。',story:'空の広さを体感させる代表的な星並びです。明るい星の少ない秋の空では、大きな四角形が地図の目盛りのように役立ちます。',find:['秋の南東〜南の空で大きな四角形を探す','四辺形からアンドロメダ座へ星をたどる','周辺の暗い星座にも注目'],relations:['アンドロメダ座','ペルセウス座','うお座']},
+ 'ペルセウス座':{point:'カシオペヤ座とおうし座の間に広がり、α星ミルファク周辺の星の集まりが見どころです。二重星団は双眼鏡で特に楽しみたい対象。',relation:'アンドロメダ座の姫を救う英雄で、カシオペヤ座、ケフェウス座、ペガスス座、くじら座と連続した神話の登場人物です。',story:'ペルセウス座流星群の放射点があることで有名ですが、流星群の母天体はスイフト・タットル彗星で、星座の星とは距離も性質もまったく異なります。',find:['北の空のカシオペヤ座を探す','その下方に伸びる星列を見つける','双眼鏡で二重星団を観察'],relations:['カシオペヤ座','アンドロメダ座','おうし座']},
+ 'おうし座':{point:'橙色のアルデバランとV字形のヒアデス星団、さらに少し離れたすばるM45が有名です。すばるは若い星々がまとまった散開星団です。',relation:'オリオン座の三つ星を延ばすとアルデバランへたどりつきます。ぎょしゃ座のカペラ、ふたご座のカストルとポルックスも冬の星探しの目印。',story:'アルデバランはヒアデス星団とほぼ同方向に見えるものの、その星団の一員ではありません。星座の見た目と星の実際の立体配置が違う典型例です。',find:['オリオンの三つ星の延長に赤いアルデバランを探す','V字のヒアデスを確認','双眼鏡ですばるを一視野に収める'],relations:['オリオン座','ぎょしゃ座','ふたご座']},
+ 'はくちょう座':{point:'白鳥の尾のデネブ、頭部側のアルビレオ、左右に開く翼で北十字と呼ばれる星並びができます。',relation:'デネブはこと座のベガ、わし座のアルタイルと夏の大三角を作ります。はくちょう座は天の川に沿う星座で、星野の密度の違いを双眼鏡で比較できます。',story:'デネブという名前には「尾」の意味があり、星の名前そのものにもアラビア語をはじめとした文化交流の歴史が残されています。',find:['夏の大三角のデネブを見つける','北十字の十字形を追う','低倍率双眼鏡で天の川を流す'],relations:['こと座','わし座','こぎつね座']},
+ 'こと座':{point:'ベガは夏の大三角の頂点の一つ。小さな平行四辺形の近くに環状星雲M57があります。',relation:'はくちょう座のデネブ、わし座のアルタイルとともに夏の大三角を作ります。',story:'ベガは非常に明るく、七夕伝説では織女星と呼ばれてきました。物語と恒星の物理的特徴を分けて理解すると二重に楽しめます。',find:['天頂近くの明るいベガを探す','小さな平行四辺形を確認','望遠鏡があればM57へ'],relations:['はくちょう座','わし座','ヘルクレス座']},
+ 'わし座':{point:'アルタイルを中心に左右に星が並ぶ形が見つけやすい星座。天の川の中で光る白い星です。',relation:'こと座のベガ、はくちょう座のデネブと夏の大三角を作り、七夕伝説でアルタイルは彦星と呼ばれます。',story:'ベガとアルタイルは空で近く見えても宇宙空間では互いに遠く離れています。星座の結び線も地球から見た投影にすぎません。',find:['夏の大三角でアルタイルを探す','両脇の星を確認','天の川を横切る位置関係を眺める'],relations:['こと座','はくちょう座','や座']},
+ 'さそり座':{point:'赤色超巨星アンタレスと、南の空でS字に曲がる尾が特徴です。M6・M7などの散開星団もあります。',relation:'オリオン座と季節を分けて現れるという神話で知られ、いて座の天の川中心方向へもつながります。',story:'アンタレスの名は火星に対抗するような赤さにちなみます。地球から見た星の色は恒星の表面温度に関係しています。',find:['夏の南の空で赤いアンタレスを探す','尾の曲線を追う','暗い空ならいて座方面の天の川へ'],relations:['オリオン座','いて座','てんびん座']},
+ 'いて座':{point:'ティーポット形の星並びは天の川の中心方向を探す手掛かり。M8干潟星雲やM22などの天体が集中します。',relation:'さそり座の東側に接していて、夏の天の川のもっとも濃い領域を観察できます。',story:'射手という形だけでなく、実際には私たちの銀河中心方向を見ていることが大きな科学的見どころです。',find:['南の低い空にティーポット形を探す','その周辺の天の川の濃淡を眺める','双眼鏡で星雲・星団を探索'],relations:['さそり座','へびつかい座','たて座']},
+ 'ふたご座':{point:'カストルとポルックスが双子の頭を示す明るい目印。カストルは多重星系、ポルックスは橙色の巨星です。',relation:'オリオン座の北東側で、おうし座からかに座へ続く黄道十二星座の一つ。',story:'毎年12月のふたご座流星群の放射点が位置するため、冬の夜空で話題になります。流星群を眺める時は一点を見る必要はありません。',find:['冬の大三角の上方で並んだ2星を探す','足元へ伸びる星列をたどる','双眼鏡で散開星団M35を探す'],relations:['オリオン座','おうし座','かに座']},
+ 'しし座':{point:'レグルスと、頭部から胸部の「？」のような形が目印。後方には尾を表すデネボラがあります。',relation:'デネボラはうしかい座のアークトゥルス、おとめ座のスピカと春の大三角を作ります。',story:'レグルスは黄道に近く、月や惑星と見かけ上接近することがあります。天体が実際に衝突するわけではなく、視線方向の現象です。',find:['春の南の空でレグルスを見つける','頭部の「？」の星並びを探す','後方のデネボラまでたどる'],relations:['おとめ座','うしかい座','かに座']},
+ 'おとめ座':{point:'一等星スピカが目印。おとめ座銀河団の方向には、比較的近くの銀河が多数集まっています。',relation:'北斗七星の柄からうしかい座のアークトゥルスを通ってスピカへたどる「春の大曲線」が有名です。',story:'スピカの名は穀物の穂に関連し、収穫や季節と天の星を結びつけた古代の人々の視点がうかがえます。',find:['北斗七星の柄の曲線を延ばす','アークトゥルスからスピカへ','双眼鏡で広大な春の銀河領域を意識する'],relations:['うしかい座','しし座','てんびん座']},
+ 'おおぐま座':{point:'北斗七星はおおぐま座の胴体と尾をなす一部分。星座全体はその周囲にもっと広く伸びています。',relation:'北斗七星の柄を延ばせばうしかい座のアークトゥルス、おとめ座のスピカへ、柄杓の先を延ばせばこぐま座の北極星へ。',story:'北斗七星は正式な星座ではなく、複数の明るい星が作る「星の並び」の呼称です。',find:['北の空で北斗七星を見つける','ひしゃくの外側に熊の脚を探す','柄から春の大曲線へ'],relations:['こぐま座','りょうけん座','うしかい座']},
+ 'こぐま座':{point:'北極星（ポラリス）は小熊の尾に相当します。北極星は天の北極に近いため地球の自転中も位置が大きく変わりません。',relation:'おおぐま座の北斗七星から北極星を探せます。カシオペヤ座のW字も反対側から北極星を見つける目安です。',story:'北極星は完全に動かないわけでも、一等星でもありません。現代の北極星が数千年後も同じ役を続けるわけではないのも地球の歳差運動によるものです。',find:['北斗七星のひしゃくの先の2星を探す','2星の間隔を約5倍延ばす','北極星を起点に小熊の尾と胴を追う'],relations:['おおぐま座','カシオペヤ座','りゅう座']},
+ 'みなみじゅうじ座':{point:'4つの明るい星が小さな十字形を描く南天の代表的な星座。天の南極を探すときの目印として古くから利用されてきました。',relation:'ケンタウルス座の近くに位置し、南半球の星図で目立ちます。日本では南西諸島の一部を除き全体の観望は難しい星座です。',story:'「南十字星」は正式には「みなみじゅうじ座」という星座です。北半球でよく見る「北十字」ははくちょう座の星の並びで、同じ命名方式でも天球上の場所は違います。',find:['観測できる低緯度の南の空を選ぶ','南の地平線が開けた場所で十字を探す','近くのケンタウルス座と見比べる'],relations:['ケンタウルス座','はくちょう座']},
+ 'かんむり座':{point:'半円を描く星の列の中央にアルフェッカが輝きます。小さな星座ですが王冠の形がはっきりしています。',relation:'うしかい座とヘルクレス座に挟まれた位置にあり、春から夏への橋渡しになる星座。',story:'アリアドネの冠として語られることがあり、神話上の人物が使った装身具が星座になった例です。',find:['うしかい座のアークトゥルスを探す','東側に小さな半円を探す','その先のヘルクレス座へ'],relations:['うしかい座','ヘルクレス座']},
+ 'うみへび座':{point:'長い星座で、春の空に沿って大きく伸びます。目立つ恒星アルファルドは孤独な星の名としても知られます。',relation:'かに座・しし座・からす座・コップ座の下を長く横切ります。',story:'星座としては全天最大級で、短い時間に全体を把握するのは簡単ではありません。部分ごとに区切ってたどると見つけやすくなります。',find:['春のかに座の下を探す','頭部から長い胴体をたどる','アルファルドを目印にする'],relations:['からす座','コップ座','かに座']},
+ 'たて座':{point:'肉眼では控えめですが、天の川の濃い部分を横切り、散開星団M11が見どころです。',relation:'わし座といて座の間の天の川付近に位置します。',story:'M11は野鴨星団とも呼ばれ、双眼鏡では小さな光の群れ、望遠鏡では無数の星が密集している様子が見えます。',find:['わし座のアルタイルから南へ','天の川を南下する','双眼鏡でM11を探す'],relations:['わし座','いて座']},
+ 'へび座':{point:'へびつかい座に挟まれ、頭部と尾部に分かれますが、一つの星座として扱われます。',relation:'へびつかい座と密接で、尾の側にはわし星雲M16があります。',story:'同じ星座が二つの離れた領域からなるという、88星座の中でも珍しい構造です。',find:['へびつかい座の両側を確認','西側の頭部と東側の尾部を分ける','M16方向を双眼鏡でたどる'],relations:['へびつかい座','わし座']},
+ 'こぎつね座':{point:'明るい星が少ない星座ですが、M27亜鈴状星雲があることで知られています。',relation:'はくちょう座の南、や座の北に位置します。',story:'M27は太陽程度の質量の星の晩年に放出されたガスが光る惑星状星雲。名前に惑星とありますが実際に惑星を含むわけではありません。',find:['夏の大三角を探す','はくちょう座の南に目を向ける','双眼鏡または望遠鏡でM27へ'],relations:['はくちょう座','や座']},
+ 'さんかく座':{point:'名前どおり三つの星が三角形を作る小さな星座。M33さんかく座銀河は大型ですが低い表面輝度で見つけるのが難しい銀河です。',relation:'アンドロメダ座とおひつじ座の近くです。',story:'M33はアンドロメダ銀河や天の川銀河と同じ局部銀河群に属しています。見た目の小さな星座に、遠い銀河の世界が隠れています。',find:['アンドロメダ座とおひつじ座の間を探す','小さな三角を確認','空が暗ければM33に挑戦'],relations:['アンドロメダ座','おひつじ座']},
+ 'りゅうこつ座':{point:'明るいカノープスはこの星座に属します。南天では目立ちますが、日本からは南の地平線近くにしか見えない地域があります。',relation:'とも座・ほ座とともに、かつての巨大なアルゴ船座を分けた星座の一つです。',story:'カノープスの日本名には「南極老人星」などの伝承があります。低空では大気の影響で色が変わって見えることもあります。',find:['冬の南の地平線が開けた場所を選ぶ','シリウスよりさらに南側を探す','低空で光るカノープスに注目'],relations:['とも座','ほ座','おおいぬ座']},
+ 'ほ座':{point:'旧アルゴ船座の帆に当たる領域。超新星残骸など、恒星の死後に残るガスの研究でも重要です。',relation:'りゅうこつ座・とも座と同じアルゴ船座の分割後継星座です。',story:'一つだった巨大なアルゴ船座をいくつかの星座へ分けた歴史は、星座が不変の図柄ではなく学術的な整理を受けてきたことを示します。',find:['日本では南の低空の観測条件を確認','とも座・りゅうこつ座の位置を見る','現地の南天星図で照合'],relations:['とも座','りゅうこつ座']},
+ 'とも座':{point:'散開星団M46とM47を含み、双眼鏡・望遠鏡で見比べると星の密度の違いを楽しめます。',relation:'ほ座、りゅうこつ座と同じ旧アルゴ船座の仲間です。',story:'巨大な船を一つの星座として描いた古い星図から、現在は船尾・帆・竜骨が別々の星座に分割されています。',find:['冬の南の空でおおいぬ座から探す','船尾の領域を確認','M46とM47を観察'],relations:['ほ座','りゅうこつ座']},
+ 'へびつかい座':{point:'大きな人物の姿が夏の空に広がる星座。へび座の頭部と尾部を挟むように位置します。',relation:'いて座・さそり座の近くで、へび座とセットで見つけたい夏の星座です。',story:'黄道はへびつかい座の領域も通過しますが、伝統的な黄道十二星座の数え方には含まれません。',find:['夏のさそり座の上方を探す','大きな五角形状の星並びを意識','左右のへび座を探す'],relations:['へび座','さそり座','いて座']},
+ 'かに座':{point:'明るい星は少ないものの、中央には散開星団M44プレセペ星団があり、双眼鏡では散りばめられた星の群れに見えます。',relation:'ふたご座としし座の間、黄道付近です。',story:'プレセペは「飼い葉桶」を意味する名前でも呼ばれ、肉眼でも小さなぼんやりした光として見えることがあります。',find:['ふたご座としし座の間を探す','暗い空でM44のぼんやりした光を探す','双眼鏡で星団を観察'],relations:['ふたご座','しし座']},
+ 'ぎょしゃ座':{point:'黄色みの強いカペラと大きな五角形の星並びが特徴です。天の川沿いに散開星団M36・M37・M38があります。',relation:'おうし座とふたご座、ペルセウス座の近くで冬の天の川へつながります。',story:'明るいカペラは複数の星からなる恒星系。見た目は一つの光点でも、その正体は多重系という例は星空に数多くあります。',find:['冬の空でカペラを見つける','五角形をたどる','M36・M37・M38を見比べる'],relations:['おうし座','ふたご座','ペルセウス座']}
+};
+let constFilterV10='season';
+const getSeasonV10=()=>{const dt=document.querySelector('#date')?.value||'';const m=Number(dt.slice(5,7))||new Date().getMonth()+1;return m<=2||m===12?'冬':m<=5?'春':m<=8?'夏':'秋'};
+function skyGroupV10(x){return northernV10.has(x.name)?'北天寄り':southernV10.has(x.name)?'南天寄り':'赤道付近・広域';}
+function visibleNoteV10(x){if(difficultJapanV10.has(x.name))return '日本からの観測が非常に難しい（南天の一部）';if(southernV10.has(x.name))return '日本では地域・南の地平線条件に注意';return '日本で観測可能な季節・方角を確認';}
+function categoryOptionsV10(){const season=getSeasonV10();return constellations.filter(x=>constFilterV10==='season'?x.season===season:constFilterV10==='all'?true:['春','夏','秋','冬'].includes(constFilterV10)?x.season===constFilterV10:constFilterV10==='北天'?northernV10.has(x.name):constFilterV10==='南天'?southernV10.has(x.name):constFilterV10==='zodiac'?zodiacV10.has(x.name):constFilterV10==='difficult'?difficultJapanV10.has(x.name):constFilterV10==='jp'?!difficultJapanV10.has(x.name):true)}
+function syncConstBrowseV10(){
+ const options=categoryOptionsV10(), count=document.querySelector('#constFilterCount'), select=document.querySelector('#constSelect');
+ const msg=constFilterV10==='season'?getSeasonV10()+'の星座':constFilterV10==='all'?'全天88星座':constFilterV10==='zodiac'?'黄道十二星座':constFilterV10==='jp'?'日本からの観測可能性がある星座（地域差あり）':constFilterV10==='difficult'?'日本から観測しにくい南天星座':constFilterV10+'の星座';
+ count.textContent=`${msg}：${options.length}星座。検索・選択・「ほかの星座を観る」で切り替えられます。`;
+ const old=select.value;select.replaceChildren();for(const x of options){const o=document.createElement('option');o.value=x.name;o.textContent=x.name;select.append(o)}if(options.some(x=>x.name===old))select.value=old;
+ document.querySelectorAll('#constFilters button').forEach(b=>{const active=b.dataset.cat===constFilterV10;b.classList.toggle('active',active);b.setAttribute('aria-pressed',String(active));});
+ return options;
+}
+function addReaderV10(article,x){
+ const guide=constellationExtrasV10[x.name],d=constellationDeep[x.name];
+ const detail=document.createElement('section');detail.className='constArticle';
+ if(guide){blockArticle(detail,'🔎 もう一歩深く：この星座ならではの特徴',guide.point);blockArticle(detail,'🌌 星空を横断するストーリー',guide.relation);blockArticle(detail,'✨ プラネタリウムの小話',guide.story)}
+ else{
+  const motif=/座$/.test(x.name)?x.name.slice(0,-1):x.name;
+  blockArticle(detail,'🔎 星の並びをどう読む？',`${x.see} まず「${motif}」を思わせる特徴的な光の並びを星図で確かめてみましょう。明るい恒星はすべて同じ距離にあるわけではありません。地球から見た方向に星が並んでいるだけで、実際には遠近の差があります。`);
+  blockArticle(detail,'📚 名前の歴史と周辺の景色',`${x.story} ${southernV10.has(x.name)?'南天ではヨーロッパから見えなかった星域が航海とともに記録され、航海者・天文学者による命名が増えました。':'古くから知られる星の並びと、近世になって定着した新しい星座が同じ空を分け合っています。'} 星座の名前と星図上での図柄を比べると、文化の変遷も読み取れます。`);
+ }
+ const how=guide?.find||[`観測地と日付で${x.season}の星図を確認する`,`周囲の明るい星を目印に${x.name}の領域へ向く`,`双眼鏡では低倍率から${x.see.replace(/。+$/,'')}を観察`];
+ const section=document.createElement('div');section.className='constFindSteps';how.forEach((t,i)=>{const b=document.createElement('div');const h=document.createElement('strong');h.textContent=`STEP ${i+1}`;b.append(h,document.createTextNode(t));section.append(b)});
+ const h=document.createElement('h4');h.textContent='🗺️ 見つけるための3ステップ';detail.append(h,section);
+ const relations=(guide?.relations||[]).filter(n=>constellations.some(c=>c.name===n));if(relations.length){const rh=document.createElement('h4');rh.textContent='🔗 関連する星座を続けて読む';detail.append(rh);const r=document.createElement('div');r.className='constRelations';relations.forEach(n=>{const b=document.createElement('button');b.type='button';b.textContent='✧ '+n;b.addEventListener('click',()=>{const c=constellations.find(y=>y.name===n);if(c){constFilterV10='all';syncConstBrowseV10();drawConstellation(c);document.querySelector('#constellation').scrollIntoView({block:'start',behavior:'smooth'});}});r.append(b)});detail.append(r)}
+ article.append(detail);
+}
+function appendSourcesV10(box,x){
+ const src=document.createElement('div');src.className='studyLinkPanel';
+ const title=document.createElement('b');title.textContent='📖 参考図鑑・星座絵をさらに詳しく';
+ const note=document.createElement('p');note.textContent='「やさしい88星座図鑑」の星図・イラストと各星座の解説は外部サイトで確認できます。画像や文章は転載せず、権利者のサイトに案内します。';src.append(title,note);
+ const add=(url,label)=>{const a=document.createElement('a');a.href=url;a.target='_blank';a.rel='noopener noreferrer';a.textContent=label;src.append(a)};
+ add(constLinksV10[x.name]||'https://www.study-style.com/seiza/list.html',constLinksV10[x.name]?'88星座図鑑で'+x.name+'を開く ↗':'88星座図鑑の一覧を開く ↗');
+ add(seasonalPagesV10[x.season],x.season+'の星座図を開く ↗');
+ const copyright=document.createElement('a');copyright.href='https://www.study-style.com/seiza/copyright.html';copyright.target='_blank';copyright.rel='noopener noreferrer';copyright.textContent='参考サイトの利用条件 ↗';src.append(copyright);
+ box.append(src);
+}
+
 let lastConst='',currentConst=null,figureVisible=false,allConstMode=false;
 const constellationNameSet=[...constellations].sort((a,b)=>a.name.localeCompare(b.name,'ja'));
 const nameSelector=document.querySelector('#constSelect');
-constellationNameSet.forEach(x=>{let opt=document.createElement('option');opt.value=opt.textContent=x.name;nameSelector.append(opt)});
+document.querySelectorAll('#constFilters button').forEach(b=>b.addEventListener('click',()=>{constFilterV10=b.dataset.cat;syncConstBrowseV10();drawConstellation();}));
+syncConstBrowseV10();
 constellationNameSet.forEach(x=>{if(!constellationDeep[x.name]){constellationDeep[x.name]={stars:'この星座は全天88星座の一つです。'+x.story+' 恒星の並びは明るい星だけで輪郭をつかめるものと、暗い星が多く星図を必要とするものがあります。',relations:'周辺の星座との境界は国際天文学連合が定めています。星座名のモチーフと実際の恒星の位置・距離は別の概念です。星図で隣り合う星座を探し、季節ごとの星空の変化を観察しましょう。',trivia:x.see+' 星座の歴史は、古代ギリシャ・ローマ以来の伝承だけでなく、南天探検や近世の天文学者による命名も含んでいます。星座の線の結び方自体は国際的に一通りに決まっているわけではありません。',observe:'選択日の時刻・観測地点で星図を照合してください。南天星座は日本の多くの地域では見えない場合があります。',shape:'wide'}}});
 function blockArticle(parent,heading,text){const h=document.createElement('h4');h.textContent=heading;const p=document.createElement('p');p.textContent=text;parent.append(h,p)}
 function drawConstellation(forced){
  const dt=$('#date').value;if(!dt)return;
  const month=+dt.slice(5,7),season=month===12||month<=2?'冬':month<=5?'春':month<=8?'夏':'秋';
- const options=constellations.filter(x=>(allConstMode||x.season===season)&&x.name!==lastConst);
- const x=forced||options[Math.floor(Math.random()*options.length)]||constellations[0];
+ const options=categoryOptionsV10().filter(x=>x.name!==lastConst);
+ const x=forced||options[Math.floor(Math.random()*options.length)]||categoryOptionsV10()[0]||constellations[0];
  currentConst=x;lastConst=x.name;nameSelector.value=x.name;
  const d=constellationDeep[x.name];const box=$('#constellation');box.replaceChildren();
  const h=document.createElement('h3');h.textContent='✦ '+x.name;h.style.cssText='font-size:28px;margin:0 0 6px';
  const m=document.createElement('div');m.className='meta';m.textContent=`季節の目安：${x.season} ／ 観測地・時間によって見える位置は変化します`;
+ const pills=document.createElement('div');pills.className='constPills';
+ const pillList=[x.season+'の星座',latinNames[x.name]||'全天88星座',skyGroupV10(x),visibleNoteV10(x)];if(zodiacV10.has(x.name))pillList.push('黄道十二星座');
+ pillList.forEach(t=>{const b=document.createElement('span');b.textContent=t;pills.append(b)});
  const toggles=document.createElement('div');toggles.className='constTools';
  const starBtn=document.createElement('button');starBtn.textContent='✦ 星の配置だけ';
  const figBtn=document.createElement('button');figBtn.textContent='🎨 本物の星座絵を見る';
@@ -246,15 +359,16 @@ function drawConstellation(forced){
  blockArticle(article,'📜 星座の人物像・神話・成立史',x.story+' '+(x.name in ['アンドロメダ座','カシオペヤ座','ケフェウス座','ペルセウス座','ペガスス座']?'これらの星座は古代ギリシャの王家と英雄の物語で結びついています。登場人物が空の近い場所に置かれているので、空を大きな物語の舞台として眺められます。':'星座の物語には地域・時代で複数の伝承があり、近世に設定された星座には古代ギリシャ神話が存在しないものもあります。名前の由来と後世の創作物語は区別して読みましょう。'));
  blockArticle(article,'🔭 双眼鏡・望遠鏡での見どころ',x.see+' '+d.observe+' 双眼鏡は肉眼より暗い恒星や広がった星団を観察しやすく、一方で淡い銀河・星雲は月明かりや街灯に大きく影響されます。まず肉眼で目印の星を見つけ、低倍率でゆっくり視野を移すのが基本です。');
  blockArticle(article,'💡 プラネタリウムで語りたい雑学',d.trivia+' 現在の88星座は国際天文学連合により空の領域として定義されています。星を結ぶ線画の描き方は星図ごとに違い、神話の姿は文化的な解釈です。また、星の見える季節や高さは緯度と時刻で変わります。');
+ addReaderV10(article,x);
  const more=document.createElement('div');more.className='sourcesNotes';more.innerHTML=`<a href="https://ja.wikipedia.org/wiki/${encodeURIComponent(x.name)}" target="_blank" rel="noopener">Wikipedia：${x.name} ↗</a>　 ·　<a href="https://www.nao.ac.jp/" target="_blank" rel="noopener">国立天文台 ↗</a>　 ·　<a href="https://www.iau.org/IAU/IAU/Astronomy-FAQs/Constellations.aspx" target="_blank" rel="noopener">IAUの88星座 ↗</a>`;
- const note=document.createElement('p');note.className='hint';note.textContent='※星座解説は一般的な北半球の季節を目安とした読み物です。南天の一部星座は日本から観測できません。新規追加の一部星座は概要解説で、恒星の個別データは未整備です。';
- box.append(h,m,toggles,art,legend,article,more,note);
+ const note=document.createElement('p');note.className='hint';note.textContent='※季節・北天/南天分類・国内での観測しやすさは学習用の概略です。星座の実際の高度・見え方は日時と緯度・方角で変化します。一部の星座は概説中心で、詳細な恒星データは順次整備します。';
+ box.append(h,m,pills,toggles,art,legend,article,more);appendSourcesV10(box,x);box.append(note);
 }
 $('#nextConst').onclick=()=>drawConstellation();
-$('#date').addEventListener('change',()=>{if(window.__npSkyReady)drawConstellation()});
+$('#date').addEventListener('change',()=>{if(window.__npSkyReady){syncConstBrowseV10();drawConstellation()}});
 nameSelector.onchange=()=>{const x=constellations.find(c=>c.name===nameSelector.value);if(x)drawConstellation(x)};
-$('#constSearch').oninput=()=>{const v=$('#constSearch').value.trim();if(!v)return;const x=constellationNameSet.find(c=>c.name.includes(v));if(x)drawConstellation(x)};
-$('#showAllConst').onclick=()=>{allConstMode=!allConstMode;$('#showAllConst').classList.toggle('active',allConstMode);$('#showAllConst').textContent=allConstMode?'✓ 全天88星座モード':'全天88星座から抽選';drawConstellation()};
+$('#constSearch').oninput=()=>{const v=$('#constSearch').value.trim();if(!v)return;const x=constellationNameSet.find(c=>c.name.includes(v));if(x){constFilterV10='all';syncConstBrowseV10();drawConstellation(x)}};
+$('#showAllConst').onclick=()=>drawConstellation();
 // 星座図鑑は「今日の天体」を開いてから描画します。
 
 // 観測向け夜間予報: 各地域を代表する１地点のみ。予報が取得できない場合に推測値を出さない。
