@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#080c18"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Night Picker"><title>Night Picker v10 | 星空・夜景と88星座図鑑</title>
+<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#080c18"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Night Picker"><title>Night Picker v10.1 | 星空・夜景と88星座図鑑</title>
 <style>
 .slideRow{display:flex;align-items:center;gap:12px}.slideRow input{flex:1;min-width:0;accent-color:#a9ccff;cursor:pointer}.slideRow strong{min-width:72px;font-size:13px;color:#c5dcff} .constTools{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:14px 0}.constTools button{padding:9px 12px;border:1px solid #456185;border-radius:10px;background:#142840;color:#e3eeff;cursor:pointer}.constTools button.active{background:#4467ac;color:white}.constTools select,.constTools input{min-width:0;flex:1;padding:9px;background:#111d33;color:white;border:1px solid #3f5472;border-radius:9px}.constHero{position:relative}.constFigure{position:absolute;inset:0;pointer-events:none;opacity:.66;transition:.2s}.constLegend{font-size:11px;color:#acc3e7;margin:5px 0 12px}.constArt{position:relative}.constArt svg{display:block}.constArticle p{line-height:1.95;font-size:14px}.constArticle h4{margin:19px 0 7px;color:#b5d8ff;font-size:16px}.constArticle{max-width:850px}.sourcesNotes a{color:#a6d7ff}
 
@@ -70,7 +70,7 @@ window.addEventListener('error',function(ev){
 </aside><article class="panel"><div class="roulette" id="roulette">どこへ行こう？</div><div id="result" class="result"><div class="empty"><div class="emoji">🌌</div>抽選ボタンを押して、今夜の行き先を決めよう。</div></div><h2 class="sectionTitle" style="margin-top:25px">候補一覧 <span id="listCount" class="subtle"></span></h2><div id="list" class="searchResults"></div></article></div></section>
 <section id="sky" class="sectionNav"><div class="panel"><div class="datebar"><strong>📅 観測する日</strong><input type="date" id="date" class="control"><button class="smallbtn" id="today">今日に戻す</button></div><div class="astroGrid"><section class="panel" style="box-shadow:none"><h2 class="sectionTitle">🌙 月齢と月明かり</h2><div class="moonCard"><div class="moonIcon" id="moonIcon">🌘</div><div><div id="moonName" style="font-weight:800;font-size:20px"></div><div id="moonAge" class="meta"></div><p id="moonAdvice" class="detail"></p></div></div><div class="alert">月齢と照明率は簡易計算による参考値。月出・月没時刻、正確な月の位置は国立天文台で確認してください。</div></section><section class="panel" style="box-shadow:none"><h2 class="sectionTitle">✨ 今日の見どころ</h2><div id="events"></div></section></div>
 <div class="panel" style="margin-top:15px;box-shadow:none" id="forecastPanel">
-  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px"><div><h2 class="sectionTitle">☁️ 全国の星空観測に適した天気予報</h2><p class="subtle">選択した日付の19時〜翌3時（日本時間）を、12地方の代表地点で比較します。</p></div><button class="smallbtn" id="weatherRefresh">↻ 予報を更新</button></div>
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px"><div><h2 class="sectionTitle">☁️ 全国の星空観測に適した天気予報 <span style="font-size:11px;color:#a6c9f7">v10.1</span></h2><p class="subtle">選択した日付の19時〜翌3時（日本時間）を、12地方の代表地点で比較します。</p></div><button class="smallbtn" id="weatherRefresh">↻ 予報を更新</button></div>
   <p id="forecastStatus" class="detail" role="status">予報を取得していません。</p>
   <div id="weatherSummary" class="detail"></div><div id="weatherRegions" class="weatherGrid"></div>
   <p class="hint">評価は代表地点の予測雲量・降水確率・風速から計算した参考指数です。各地方の全域を表すものではありません。街明かり、山の雲・霧、月齢、実際の現地天候は別途確認してください。遠い日付は予報が未提供です。</p>
@@ -378,38 +378,43 @@ const regionWeatherPoints=[
  ['東海','伊豆高原',34.90,139.10],['関西','曽爾高原',34.53,136.15],['中国','蒜山',35.28,133.60],
  ['四国','四国カルスト',33.48,133.01],['九州','阿蘇',32.88,131.08],['沖縄','石垣島',24.34,124.16]
 ];
+// 天気予報: 必要な日付と地点だけ取得し、通信が遅い端末でも結果を段階表示する。
 let weatherRequestId=0, weatherCache={};
+let activeWeatherControllers=[];
+function nextWeatherDate(iso){const ms=Date.parse(iso+'T12:00:00+09:00');return new Date(ms+86400000).toLocaleDateString('sv-SE',{timeZone:'Asia/Tokyo'});}
 function nightTimes(d){
- const result=[];const d0=new Date(d+'T00:00:00+09:00');
- for(let h=19;h<=27;h++){
-  const dd=new Date(d0.getTime()+h*3600000);
-  const iso=new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',hourCycle:'h23'}).format(dd).replace(' ','T');
-  result.push(iso);
- }
- return result;
+ const next=nextWeatherDate(d);
+ return [19,20,21,22,23].map(h=>`${d}T${String(h).padStart(2,'0')}:00`).concat(
+  [0,1,2,3].map(h=>`${next}T${String(h).padStart(2,'0')}:00`));
 }
 function safelyRound(a){return Number.isFinite(a)?Math.round(a):null}
 function nightWeather(data,date){
- const h=data?.hourly;if(!h||!Array.isArray(h.time))return null;
- const index=new Map(h.time.map((t,i)=>[t,i]));let points=[];
+ const h=data?.hourly;
+ if(!h||!Array.isArray(h.time))return null;
+ const indices=new Map(h.time.map((t,i)=>[t,i]));
+ const points=[];
  for(const t of nightTimes(date)){
-  const i=index.get(t);if(i===undefined)continue;
-  const cloud=Number(h.cloud_cover?.[i]), precip=Number(h.precipitation_probability?.[i]),wind=Number(h.wind_speed_10m?.[i]);
-  if(h.cloud_cover?.[i]==null||h.precipitation_probability?.[i]==null||h.wind_speed_10m?.[i]==null||!Number.isFinite(cloud)||!Number.isFinite(precip)||!Number.isFinite(wind))continue;
-  points.push({t,cloud,precip,wind});
+  const i=indices.get(t);if(i===undefined)continue;
+  const cloud=h.cloud_cover?.[i],prob=h.precipitation_probability?.[i],rain=h.precipitation?.[i],wind=h.wind_speed_10m?.[i];
+  if(cloud==null||wind==null||!Number.isFinite(Number(cloud))||!Number.isFinite(Number(wind)))continue;
+  points.push({cloud:Number(cloud),precip:prob==null?null:Number(prob),rain:rain==null?null:Number(rain),wind:Number(wind)});
  }
  if(!points.length)return null;
- const avg=(key)=>points.reduce((a,p)=>a+p[key],0)/points.length;
- const cloud=avg('cloud'),precip=Math.max(...points.map(p=>p.precip)),wind=avg('wind');
- const score=Math.max(0,Math.round(100-.65*cloud-.20*precip-.7*Math.max(0,wind-10)));
- return {cloud:safelyRound(cloud),precip:safelyRound(precip),wind:safelyRound(wind),score,n:points.length};
+ const avg=key=>points.reduce((a,p)=>a+p[key],0)/points.length;
+ const cloud=avg('cloud'),wind=avg('wind');
+ const availableProb=points.filter(x=>x.precip!==null&&Number.isFinite(x.precip));
+ const precip=availableProb.length?Math.max(...availableProb.map(p=>p.precip)):null;
+ const availableRain=points.filter(x=>x.rain!==null&&Number.isFinite(x.rain));
+ const rain=availableRain.length?Math.max(...availableRain.map(p=>p.rain)):null;
+ const score=Math.max(0,Math.round(100-.65*cloud-(precip!==null?.20*precip:0)-.7*Math.max(0,wind-10)-(rain!==null&&precip===null?Math.min(rain*12,22):0)));
+ return {cloud:safelyRound(cloud),precip:safelyRound(precip),rain:rain===null?null:Math.round(rain*10)/10,wind:safelyRound(wind),score,n:points.length,limited:points.length<9};
 }
 function showWeatherResults(date,rows){
  const root=document.querySelector('#weatherRegions'),sum=document.querySelector('#weatherSummary');root.replaceChildren();
- rows.sort((a,b)=>(b.data?.score??-1)-(a.data?.score??-1));
- let valid=rows.filter(x=>x.data);
- sum.textContent=valid.length?`比較できた地方：${valid.length}/12。上位：${valid.slice(0,3).map(x=>x.region).join('・')}（地方内の代表地点による比較）`:'予報データを取得できませんでした。';
- for(const x of rows){
+ const sorted=rows.slice().sort((a,b)=>(b.data?.score??-1)-(a.data?.score??-1));
+ const valid=sorted.filter(x=>x.data);
+ sum.textContent=valid.length?`比較できた地方：${valid.length}/12。上位：${valid.slice(0,3).map(x=>x.region).join('・')}（地方の代表地点による比較）`:'現在、予報を取得できていません。';
+ for(const x of sorted){
   const v=x.data;const level=!v?'unavailable':v.score>=70?'good':v.score>=45?'fair':'bad';
   const tag=!v?'判定不可':level==='good'?'◎ 観測向き':level==='fair'?'△ 条件付き':'× 厳しめ';
   const card=document.createElement('div');card.className='weatherEntry '+level;
@@ -417,34 +422,91 @@ function showWeatherResults(date,rows){
   const b=document.createElement('strong');b.textContent=x.region;
   const badge=document.createElement('span');badge.className='weatherTag';badge.textContent=tag;head.append(b,badge);
   const metric=document.createElement('div');metric.className='weatherMetrics';
-  metric.textContent=v?`雲量平均 ${v.cloud}% ／ 最大降水確率 ${v.precip}% ／ 風速平均 ${v.wind}km/h`:'対象時間の予報を取得できません';
-  const note=document.createElement('div');note.className='weatherDetails';note.textContent=`代表地点：${x.place}${v?` ／ ${v.n}/9時間を評価`:''}`;
+  metric.textContent=v?`雲量平均 ${v.cloud}% ／ ${v.precip!==null?'最大降水確率 '+v.precip+'%':v.rain!==null?'最大時間雨量 '+v.rain+'mm':'降水データなし'} ／ 風速平均 ${v.wind}km/h`:'対象時間の予報を取得できません';
+  const note=document.createElement('div');note.className='weatherDetails';note.textContent=`代表地点：${x.place}${v?` ／ ${v.n}/9時間を評価${v.limited?'（一部時間のみ）':''}`:''}`;
   card.append(head,metric,note);root.append(card);
  }
 }
+function makeWeatherURL(points,date,simplified=false){
+ const url=new URL('https://api.open-meteo.com/v1/forecast');
+ url.searchParams.set('latitude',points.map(x=>x[2]).join(','));
+ url.searchParams.set('longitude',points.map(x=>x[3]).join(','));
+ url.searchParams.set('hourly',simplified?'cloud_cover,precipitation,wind_speed_10m':'cloud_cover,precipitation_probability,precipitation,wind_speed_10m');
+ url.searchParams.set('timezone','Asia/Tokyo');
+ // 16日分を一括転送しない。選択夜間を含む2日だけ要求する。
+ url.searchParams.set('start_date',date);
+ const base=new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+ const lastForecastDate=new Date(Date.parse(base+'T12:00:00+09:00')+15*86400000).toLocaleDateString('sv-SE',{timeZone:'Asia/Tokyo'});
+ url.searchParams.set('end_date',nextWeatherDate(date)>lastForecastDate?lastForecastDate:nextWeatherDate(date));
+ return url.toString();
+}
+async function fetchWeatherGroup(group,date,req,simplified=false){
+ const ctrl=new AbortController();activeWeatherControllers.push(ctrl);
+ const timeout=setTimeout(()=>ctrl.abort(),12500);
+ try{
+  const response=await fetch(makeWeatherURL(group,date,simplified),{signal:ctrl.signal,cache:'no-store'});
+  if(!response.ok){
+   let detail='';try{const e=await response.json();detail=e.reason||''}catch{}
+   throw Error('HTTP '+response.status+(detail?' ('+String(detail).slice(0,110)+')':''));
+  }
+  const data=await response.json();
+  const arr=Array.isArray(data)?data:[data];
+  if(arr.length!==group.length)throw Error('地点数の応答が一致しません');
+  return group.map((p,i)=>({region:p[0],place:p[1],data:nightWeather(arr[i],date)}));
+ }finally{clearTimeout(timeout);activeWeatherControllers=activeWeatherControllers.filter(x=>x!==ctrl)}
+}
+function weatherFailureLabel(e){
+ if(e?.name==='AbortError')return '通信タイムアウト';
+ const msg=String(e?.message||e||'');
+ if(/HTTP 429/.test(msg))return 'APIへのアクセス集中（HTTP 429）';
+ if(/HTTP 4\d\d|HTTP 5\d\d/.test(msg))return msg.slice(0,95);
+ if(/Failed to fetch|NetworkError|Load failed|fetch/i.test(msg))return '通信に失敗（ネットワーク / ブラウザ制限）';
+ return msg.slice(0,90)||'通信エラー';
+}
 async function fetchWeather(force=false){
- const date=document.querySelector('#date').value,status=document.querySelector('#forecastStatus');
- if(!date)return;
+ const date=document.querySelector('#date').value,status=document.querySelector('#forecastStatus');if(!date)return;
  const jstTodayStr=new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
  const diff=Math.round((new Date(date+'T00:00:00+09:00')-new Date(jstTodayStr+'T00:00:00+09:00'))/86400000);
  const box=document.querySelector('#weatherRegions'),summary=document.querySelector('#weatherSummary');
- if(diff<0||diff>15){weatherRequestId++;box.replaceChildren();summary.textContent='';status.textContent='選択日は時間別天気予報の対象外です。今日から15日先までの日付を選択してください。';return;}
+ activeWeatherControllers.forEach(c=>c.abort());activeWeatherControllers=[];
  const req=++weatherRequestId;
- if(!force&&weatherCache[date]&&Date.now()-weatherCache[date].at<20*60*1000){showWeatherResults(date,weatherCache[date].rows);status.textContent='保存済みの予報（20分以内）を表示しています。';return;}
- status.textContent='全国12地方の時間別天気予報を取得しています…';box.replaceChildren();summary.textContent='';
- const lat=regionWeatherPoints.map(x=>x[2]).join(','),lon=regionWeatherPoints.map(x=>x[3]).join(',');
- const url='https://api.open-meteo.com/v1/forecast?latitude='+lat+'&longitude='+lon+'&hourly=cloud_cover,precipitation_probability,wind_speed_10m&timezone=Asia%2FTokyo&forecast_days=16';
- try{
-  const ctrl=new AbortController();const timeout=setTimeout(()=>ctrl.abort(),18000);
-  let response;try{response=await fetch(url,{signal:ctrl.signal,cache:'default'});}finally{clearTimeout(timeout)}
-  if(!response.ok)throw Error('HTTP '+response.status);
-  const json=await response.json();if(!Array.isArray(json)||json.length!==regionWeatherPoints.length)throw Error('予報地点数が一致しません');
+ if(diff<0||diff>15){box.replaceChildren();summary.textContent='';status.textContent='時間別天気予報の対象外です。今日から15日先までの日付を選択してください。';return;}
+ if(!force&&weatherCache[date]&&Date.now()-weatherCache[date].at<15*60*1000){
+  showWeatherResults(date,weatherCache[date].rows);status.textContent='取得済みの予報（15分以内）を表示しています。';return;
+ }
+ box.replaceChildren();summary.textContent='';status.textContent='全国12地方の予報を読み込み中…（取得できた地方から表示します）';
+ const results=regionWeatherPoints.map(x=>({region:x[0],place:x[1],data:null}));
+ const errors=[];
+ // 4地点ずつに分割してタイムアウトや応答容量の影響を抑える。
+ const groups=[];for(let i=0;i<regionWeatherPoints.length;i+=4)groups.push({offset:i,points:regionWeatherPoints.slice(i,i+4)});
+ const fetchEachGroup=async(g)=>{
+  let got=[];
+  try{got=await fetchWeatherGroup(g.points,date,req,false)}
+  catch(e){
+   if(req!==weatherRequestId)return;
+   // 1回の失敗で全地方が取得不可になるのを防ぐ。軽い項目で2地点ずつ再試行。
+   errors.push(weatherFailureLabel(e));
+   const pairs=[g.points.slice(0,2),g.points.slice(2,4)];
+   const retry=await Promise.allSettled(pairs.map(p=>fetchWeatherGroup(p,date,req,true)));
+   got=retry.flatMap((r,i)=>r.status==='fulfilled'?r.value:(errors.push(weatherFailureLabel(r.reason)),pairs[i].map(p=>({region:p[0],place:p[1],data:null}))));
+  }
   if(req!==weatherRequestId)return;
-  const rows=regionWeatherPoints.map((x,i)=>({region:x[0],place:x[1],data:nightWeather(json[i],date)}));
-  weatherCache[date]={rows,at:Date.now()};showWeatherResults(date,rows);
+  got.forEach(x=>{const ix=results.findIndex(r=>r.region===x.region);if(ix>=0)results[ix]=x});
+  showWeatherResults(date,results);
+  const count=results.filter(r=>r.data).length;
+  status.textContent=`全国12地方の予報を取得中：${count}地方でデータを取得（${date} 19:00〜翌3:00）`;
+ };
+ try{
+  await Promise.all(groups.map(fetchEachGroup));
+  if(req!==weatherRequestId)return;
+  const valid=results.filter(x=>x.data).length;
+  if(valid)weatherCache[date]={rows:results,at:Date.now()};
   const updated=new Intl.DateTimeFormat('ja-JP',{timeZone:'Asia/Tokyo',hour:'2-digit',minute:'2-digit'}).format(new Date());
-  status.textContent=`予報取得：${updated}（日本時間）｜ ${date} 19:00〜翌3:00｜出典 Open-Meteo。評価は天気のみの参考判定です。`;
- }catch(e){if(req!==weatherRequestId)return;status.textContent='天気予報を取得できませんでした。インターネット接続を確認して「予報を更新」を押してください。';summary.textContent='推測による評価は表示していません。';console.warn('Forecast failed',e);}
+  const failures=[...new Set(errors)].slice(0,2).join('、');
+  if(valid===12)status.textContent=`予報取得完了：${updated}（日本時間）｜12地方｜出典 Open-Meteo。`;
+  else if(valid)status.textContent=`一部取得：${valid}/12地方（${updated}）${failures?' ／ 未取得の原因：'+failures:''}。予報を更新すると再取得します。`;
+  else status.textContent=`予報を取得できませんでした。${failures?'原因：'+failures+'。':''}下の気象庁リンクでも確認できます。しばらくしてから「予報を更新」を押してください。`;
+ }catch(e){if(req!==weatherRequestId)return;status.textContent='予報の処理中に問題が発生しました：'+weatherFailureLabel(e);}
 }
 document.querySelector('#weatherRefresh').onclick=()=>fetchWeather(true);
 document.querySelector('#date').addEventListener('change',()=>{if(window.__npSkyReady)fetchWeather()});
