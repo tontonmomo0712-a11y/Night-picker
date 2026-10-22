@@ -31,6 +31,22 @@ button,a{touch-action:manipulation}
 .constArticle{overflow-wrap:anywhere}.constArticle details{margin-top:15px;border:1px solid #37506e;border-radius:13px;padding:12px;background:#12223a}
 .constArticle details summary{font-weight:700;font-size:13px;cursor:pointer;color:#b9d9ff}
 @media(max-width:620px){.constFindSteps{grid-template-columns:1fr}.constTools{gap:7px}.constTools input{flex:1 1 100%}.constTools select{flex:1 1 100%}#constellation{padding:14px!important}.constArticle p{font-size:13.5px;line-height:1.85}.studyLinkPanel a{display:block;text-align:center}}
+
+/* v13 destination detail cards */
+.spotPreview{margin:15px 0 18px;background:#09172a;border:1px solid #3f5675;border-radius:15px;overflow:hidden}
+.spotPreviewStage{width:100%;aspect-ratio:16/9;min-height:185px;max-height:390px;overflow:hidden;position:relative;background:linear-gradient(145deg,#07142a,#253957 58%,#0e192d)}
+.spotPreviewStage img{display:block;width:100%;height:100%;object-fit:cover}
+.spotPhotoLoading{position:absolute;inset:0;display:grid;place-items:center;text-align:center;color:#bcd2ef;padding:15px}
+.spotPreviewCaption{padding:9px 12px;font-size:11px;color:#b6cbe5;display:flex;gap:9px 15px;flex-wrap:wrap;line-height:1.7}
+.spotPreviewCaption span{flex:1 1 200px}
+.spotPreviewCaption a,.spotIntro a{color:#a9d6ff;text-decoration:underline;text-underline-offset:2px}
+.spotNoPhoto{height:100%;display:flex;flex-direction:column;gap:9px;align-items:center;justify-content:center;text-align:center;padding:20px;color:#ddeaff}
+.spotNoPhoto b{font-size:44px}.spotNoPhoto small{color:#adc2de}
+.spotIntro{background:#12233b;border-left:3px solid #9acaff;border-radius:12px;padding:15px;margin:12px 0 16px}
+.spotIntro h3{font-size:17px;margin:0 0 9px;color:#c2deff}
+.spotIntro p{margin:0;line-height:1.9}
+.spotIntro .ref{margin-top:9px;font-size:12px}
+
 </style>
 <style>
 .weatherGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(218px,1fr));gap:11px;margin:14px 0}
@@ -117,6 +133,85 @@ let displayedLimit=35, lastListPool=[];
 function appendListChunk(){const list=$('#list');const batch=lastListPool.slice(list.querySelectorAll('.item').length,displayedLimit);const frag=document.createDocumentFragment();for(const s of batch){const d=document.createElement('div');d.className='item';const label=document.createElement('span');label.textContent=`${s.pref}｜${s.name}（${s.type}） — ${fmt(hours(s))}`;const b=document.createElement('button');b.textContent='詳細';b.onclick=()=>show(s);d.append(label,b);frag.append(d)}list.append(frag);let more=$('#moreDestinations');if(!more){more=document.createElement('button');more.id='moreDestinations';more.className='smallbtn';more.style.cssText='margin:10px 0;width:100%';more.onclick=()=>{displayedLimit+=35;appendListChunk()};list.after(more)}const remaining=lastListPool.length-list.querySelectorAll('.item').length;more.hidden=remaining<=0;more.textContent=`残り${remaining}か所を表示（次の35件）`}
 function renderList(){const a=pool();lastListPool=a;displayedLimit=35;$('#count').textContent=`対象：${a.length}か所 / 全${spots.length}か所（追加地点の時間は県代表点の参考値）`;$('#listCount').textContent=a.length+'か所';$('#drawBtn').disabled=!a.length;$('#list').replaceChildren();if(!a.length){$('#list').textContent='該当するスポットがありません。条件を緩めてください。';const more=$('#moreDestinations');if(more)more.hidden=true;return}appendListChunk()}
 
+
+// Photo lookup loads only for the selected destination; attribution stays beside the image.
+function googlePlaceLink(s){
+ return 'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(s.name+' '+s.pref);
+}
+function makeSpotIntro(s){
+ const name=s.name;
+ const feature=/湖|池|沼/.test(name)?'水面と周囲の広い空を楽しむ候補です。水辺の足場や強風に注意してください。':
+ /岬|崎|灯台|海|浜|港|島/.test(name)?'海沿いならではの開けた景色が魅力です。潮位・風・立入禁止区域を確認しましょう。':
+ /山|峠|高原|岳|展望|スカイライン/.test(name)?'標高差や地形を生かした眺望を楽しめる候補です。夜間の道路規制や冬季閉鎖にも注意してください。':
+ /公園|庭園|城跡|城址/.test(name)?'散策と景色を組み合わせやすい候補です。閉園時間と夜間に入れる範囲を確認してください。':
+ /橋|タワー|ビル/.test(name)?'街と人工構造物の光を楽しめる候補です。交通や歩行者の妨げにならない場所から眺めましょう。':
+ '周辺の風景や空の広がりを楽しむ候補です。利用可能な観賞位置を事前に確認してください。';
+ const action=s.type==='星空'?'雲が少なく月明かりの弱い夜には、星座や星団を探すのに向いています。':'日没直後の薄明から夜へ移る時間帯は、街明かりと空の色の変化を楽しめます。';
+ return [s.desc||'',feature,action].filter(Boolean).join(' ');
+}
+function spotMapFallback(s,stage,caption){
+ stage.replaceChildren();
+ if(!s.approx&&Number.isFinite(s.lat)&&Number.isFinite(s.lon)){
+  const lat=s.lat,lon=s.lon,d=.016;
+  const params=new URLSearchParams({bbox:[lon-d,lat-d,lon+d,lat+d].join(','),layer:'mapnik',marker:lat+','+lon});
+  const frame=document.createElement('iframe');
+  frame.title=s.name+'付近の地図プレビュー';frame.src='https://www.openstreetmap.org/export/embed.html?'+params.toString();frame.loading='lazy';
+  frame.style.cssText='width:100%;height:100%;min-height:240px;border:0;display:block';
+  stage.append(frame);
+  caption.textContent='写真が見つからなかったため、周辺地図を表示しています。© OpenStreetMap contributors';
+ }else{
+  const p=document.createElement('div');p.className='spotNoPhoto';
+  const icon=document.createElement('b');icon.textContent='🌌';
+  const msg=document.createElement('span');msg.textContent='このスポットの写真は取得できませんでした';
+  const note=document.createElement('small');note.textContent='座標が概算のため、地図に正確なピンは表示していません。';
+  p.append(icon,msg,note);stage.append(p);
+  caption.textContent='Googleマップで写真や現地情報を確認してください。';
+ }
+}
+function spotPhotoPreview(s){
+ const root=document.createElement('figure');root.className='spotPreview';
+ const stage=document.createElement('div');stage.className='spotPreviewStage';
+ const note=document.createElement('p');note.className='spotPhotoLoading';note.textContent='🖼️ スポットの参考写真を探しています…';stage.append(note);
+ const bottom=document.createElement('figcaption');bottom.className='spotPreviewCaption';
+ const credit=document.createElement('span');credit.textContent='写真の提供元を確認中';bottom.append(credit);
+ const mapLink=document.createElement('a');mapLink.href=googlePlaceLink(s);mapLink.target='_blank';mapLink.rel='noopener noreferrer';mapLink.textContent='Googleマップで現地の写真を見る ↗';bottom.append(mapLink);
+ root.append(stage,bottom);
+ let settled=false;
+ const fallback=()=>{if(settled||!root.isConnected)return;settled=true;spotMapFallback(s,stage,credit)};
+ setTimeout(fallback,9500);
+ (async()=>{
+ try{
+  const query=s.name.replace(/周辺|付近|一帯|エリア/g,'').trim();
+  const tokens=query.split(/[・\/／\s()（）-]+/).filter(t=>t.length>=2);
+  const params=new URLSearchParams({action:'query',format:'json',origin:'*',generator:'search',gsrsearch:query+' '+s.pref,gsrnamespace:'6',gsrlimit:'18',prop:'imageinfo',iiprop:'url|extmetadata',iiurlwidth:'900'});
+  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),7000);
+  let res;try{res=await fetch('https://commons.wikimedia.org/w/api.php?'+params.toString(),{signal:controller.signal})}finally{clearTimeout(timer)}
+  if(!res.ok)throw Error('Image search failed');
+  const data=await res.json();
+  const entries=Object.values(data.query?.pages||{}).map(p=>({title:p.title||'',image:p.imageinfo&&p.imageinfo[0]}))
+   .filter(p=>p.image&&p.image.thumburl&&/\.(jpg|jpeg|png|webp)$/i.test(p.title))
+   .map(p=>({...p,score:tokens.reduce((n,t)=>n+(p.title.includes(t)?Math.min(t.length*5,30):0),0)}))
+   .filter(p=>p.score>=10).sort((a,b)=>b.score-a.score);
+  if(!entries.length){fallback();return}
+  const pick=entries[0],photo=document.createElement('img');
+  photo.alt=s.name+'の関連参考写真（撮影位置はリンク先で確認）';photo.decoding='async';photo.loading='eager';
+  photo.referrerPolicy='no-referrer';let done=false;
+  photo.onload=()=>{
+   if(done||settled||!root.isConnected)return;done=true;settled=true;
+   stage.replaceChildren(photo);
+   const metadata=pick.image.extmetadata||{};
+   const strip=value=>{const el=document.createElement('div');el.innerHTML=String(value||'');return (el.textContent||'').trim()};
+   const author=strip(metadata.Artist?.value).slice(0,55),license=strip(metadata.LicenseShortName?.value).slice(0,30);
+   credit.textContent='参考写真：Wikimedia Commons'+(author?' ／ '+author:'')+(license?' ／ '+license:'')+'（現地と異なる場合があります）';
+   const srcLink=document.createElement('a');srcLink.href=pick.image.descriptionurl||'https://commons.wikimedia.org/wiki/'+encodeURIComponent(pick.title.replace(/ /g,'_'));srcLink.target='_blank';srcLink.rel='noopener noreferrer';srcLink.textContent='写真の出典・ライセンス ↗';bottom.insertBefore(srcLink,mapLink);
+  };
+  photo.onerror=fallback;
+  photo.src=pick.image.thumburl;
+  if(photo.complete&&photo.naturalWidth>0)photo.onload();
+ }catch(e){fallback()}
+ })();
+ return root;
+}
 function show(s){selected=s;const h=hours(s);$('#result').innerHTML='';const hero=document.createElement('div');hero.innerHTML=`<div class="eyebrow">YOUR DESTINATION ✦</div><h2 class="winner"></h2><div class="meta"></div><div class="stats"><div class="stat"><strong></strong><small>推定車移動時間</small></div><div class="stat"><strong></strong><small>直線距離</small></div><div class="stat"><strong></strong><small>星空の暗さ目安 / 5</small></div></div><p class="detail"></p><p class="alert">推定時間は交通・高速道路・フェリー・規制を考慮していません。出発前に経路と現地の夜間利用を必ず確認。</p><div class="buttons"><a target="_blank" rel="noopener" id="dir">Google Mapsで経路を確認 ↗</a><button id="skyGo">今日の星空情報を見る</button></div>`;hero.querySelector('.winner').textContent=s.name;hero.querySelector('.meta').textContent=`${s.pref} ・ ${s.type}`;hero.querySelectorAll('.stat strong')[0].textContent=fmt(h);hero.querySelectorAll('.stat strong')[1].textContent=Math.round(km(origin[0],origin[1],s.lat,s.lon))+'km';hero.querySelectorAll('.stat strong')[2].textContent='★'.repeat(s.sky)+'☆'.repeat(5-s.sky);hero.querySelector('.detail').textContent=s.desc+(s.approx?' ※追加スポットの移動時間は都道府県代表点による暫定値。実際の所在地とは異なります。':'');if(s.source){const a=document.createElement('a');a.href=s.source;a.target='_blank';a.rel='noopener';a.textContent=' 🔗 紹介・参考情報を見る ↗';a.style.color='#95c6ff';hero.querySelector('.detail').append(a)}const dest=s.approx?s.name+' '+s.pref:s.lat+','+s.lon;hero.querySelector('#dir').href='https://www.google.com/maps/dir/?api=1&origin='+encodeURIComponent(origin[0]+','+origin[1])+'&destination='+encodeURIComponent(dest)+'&travelmode=driving';hero.querySelector('#skyGo').onclick=()=>{$('nav button[data-view="sky"]').click()};$('#result').append(hero)}
 let drawing=false;
 $('#drawBtn').onclick=()=>{
