@@ -212,7 +212,28 @@ function spotPhotoPreview(s){
  })();
  return root;
 }
-function show(s){selected=s;const h=hours(s);$('#result').innerHTML='';const hero=document.createElement('div');hero.innerHTML=`<div class="eyebrow">YOUR DESTINATION ✦</div><h2 class="winner"></h2><div class="meta"></div><div class="stats"><div class="stat"><strong></strong><small>推定車移動時間</small></div><div class="stat"><strong></strong><small>直線距離</small></div><div class="stat"><strong></strong><small>星空の暗さ目安 / 5</small></div></div><p class="detail"></p><p class="alert">推定時間は交通・高速道路・フェリー・規制を考慮していません。出発前に経路と現地の夜間利用を必ず確認。</p><div class="buttons"><a target="_blank" rel="noopener" id="dir">Google Mapsで経路を確認 ↗</a><button id="skyGo">今日の星空情報を見る</button></div>`;hero.querySelector('.winner').textContent=s.name;hero.querySelector('.meta').textContent=`${s.pref} ・ ${s.type}`;hero.querySelectorAll('.stat strong')[0].textContent=fmt(h);hero.querySelectorAll('.stat strong')[1].textContent=Math.round(km(origin[0],origin[1],s.lat,s.lon))+'km';hero.querySelectorAll('.stat strong')[2].textContent='★'.repeat(s.sky)+'☆'.repeat(5-s.sky);hero.querySelector('.detail').textContent=s.desc+(s.approx?' ※追加スポットの移動時間は都道府県代表点による暫定値。実際の所在地とは異なります。':'');if(s.source){const a=document.createElement('a');a.href=s.source;a.target='_blank';a.rel='noopener';a.textContent=' 🔗 紹介・参考情報を見る ↗';a.style.color='#95c6ff';hero.querySelector('.detail').append(a)}const dest=s.approx?s.name+' '+s.pref:s.lat+','+s.lon;hero.querySelector('#dir').href='https://www.google.com/maps/dir/?api=1&origin='+encodeURIComponent(origin[0]+','+origin[1])+'&destination='+encodeURIComponent(dest)+'&travelmode=driving';hero.querySelector('#skyGo').onclick=()=>{$('nav button[data-view="sky"]').click()};$('#result').append(hero)}
+function show(s){
+ selected=s;const h=hours(s);$('#result').replaceChildren();
+ const hero=document.createElement('div');
+ hero.innerHTML='<div class="eyebrow">YOUR DESTINATION ✦</div><h2 class="winner"></h2><div class="meta"></div><div class="media"></div><div class="stats"><div class="stat"><strong></strong><small>推定車移動時間</small></div><div class="stat"><strong></strong><small>直線距離（参考）</small></div><div class="stat"><strong></strong><small>星空の暗さ目安 / 5</small></div></div><div class="spotIntro"><h3>このスポットの見どころ</h3><p class="detail"></p></div><p class="alert">所要時間は高速道路・フェリー・渋滞を考慮しない概算です。現地の夜間立入可否、駐車、交通規制と天候を確認してください。</p><div class="buttons"><a target="_blank" rel="noopener noreferrer" id="dir">Googleマップで経路を見る ↗</a><a target="_blank" rel="noopener noreferrer" id="photoLink">Googleマップの写真を見る ↗</a><button id="skyGo">今日の星空情報を見る</button></div>';
+ hero.querySelector('.winner').textContent=s.name;
+ hero.querySelector('.meta').textContent=s.pref+' ・ '+s.type;
+ const stats=hero.querySelectorAll('.stat strong');
+ stats[0].textContent=fmt(h);
+ stats[1].textContent=s.approx?'—':Math.round(km(origin[0],origin[1],s.lat,s.lon))+'km';
+ stats[2].textContent='★'.repeat(s.sky)+'☆'.repeat(5-s.sky);
+ hero.querySelector('.detail').textContent=makeSpotIntro(s)+(s.approx?' ※移動時間は県の代表地点を使った粗い推定で、目的地の実際の位置・移動時間とは異なります。':'');
+ if(s.source){
+  const ref=document.createElement('p');ref.className='ref';
+  const a=document.createElement('a');a.href=s.source;a.target='_blank';a.rel='noopener noreferrer';a.textContent='参考サイトで詳細を見る ↗';ref.append(a);hero.querySelector('.spotIntro').append(ref);
+ }
+ const dest=s.approx?s.name+' '+s.pref:s.lat+','+s.lon;
+ hero.querySelector('#dir').href='https://www.google.com/maps/dir/?api=1&origin='+encodeURIComponent(origin[0]+','+origin[1])+'&destination='+encodeURIComponent(dest)+'&travelmode=driving';
+ hero.querySelector('#photoLink').href=googlePlaceLink(s);
+ hero.querySelector('#skyGo').onclick=()=>$('nav button[data-view="sky"]').click();
+ $('#result').append(hero);
+ hero.querySelector('.media').append(spotPhotoPreview(s));
+}
 let drawing=false;
 $('#drawBtn').onclick=()=>{
  if(drawing)return;
