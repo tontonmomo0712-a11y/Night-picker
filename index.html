@@ -118,7 +118,20 @@ function appendListChunk(){const list=$('#list');const batch=lastListPool.slice(
 function renderList(){const a=pool();lastListPool=a;displayedLimit=35;$('#count').textContent=`対象：${a.length}か所 / 全${spots.length}か所（追加地点の時間は県代表点の参考値）`;$('#listCount').textContent=a.length+'か所';$('#drawBtn').disabled=!a.length;$('#list').replaceChildren();if(!a.length){$('#list').textContent='該当するスポットがありません。条件を緩めてください。';const more=$('#moreDestinations');if(more)more.hidden=true;return}appendListChunk()}
 
 function show(s){selected=s;const h=hours(s);$('#result').innerHTML='';const hero=document.createElement('div');hero.innerHTML=`<div class="eyebrow">YOUR DESTINATION ✦</div><h2 class="winner"></h2><div class="meta"></div><div class="stats"><div class="stat"><strong></strong><small>推定車移動時間</small></div><div class="stat"><strong></strong><small>直線距離</small></div><div class="stat"><strong></strong><small>星空の暗さ目安 / 5</small></div></div><p class="detail"></p><p class="alert">推定時間は交通・高速道路・フェリー・規制を考慮していません。出発前に経路と現地の夜間利用を必ず確認。</p><div class="buttons"><a target="_blank" rel="noopener" id="dir">Google Mapsで経路を確認 ↗</a><button id="skyGo">今日の星空情報を見る</button></div>`;hero.querySelector('.winner').textContent=s.name;hero.querySelector('.meta').textContent=`${s.pref} ・ ${s.type}`;hero.querySelectorAll('.stat strong')[0].textContent=fmt(h);hero.querySelectorAll('.stat strong')[1].textContent=Math.round(km(origin[0],origin[1],s.lat,s.lon))+'km';hero.querySelectorAll('.stat strong')[2].textContent='★'.repeat(s.sky)+'☆'.repeat(5-s.sky);hero.querySelector('.detail').textContent=s.desc+(s.approx?' ※追加スポットの移動時間は都道府県代表点による暫定値。実際の所在地とは異なります。':'');if(s.source){const a=document.createElement('a');a.href=s.source;a.target='_blank';a.rel='noopener';a.textContent=' 🔗 紹介・参考情報を見る ↗';a.style.color='#95c6ff';hero.querySelector('.detail').append(a)}const dest=s.approx?s.name+' '+s.pref:s.lat+','+s.lon;hero.querySelector('#dir').href='https://www.google.com/maps/dir/?api=1&origin='+encodeURIComponent(origin[0]+','+origin[1])+'&destination='+encodeURIComponent(dest)+'&travelmode=driving';hero.querySelector('#skyGo').onclick=()=>{$('nav button[data-view="sky"]').click()};$('#result').append(hero)}
-$('#drawBtn').onclick=()=>{let a=[...pool()];if(!a.length)return;const n=Math.min(a.length,+$('#drawCount').value),chosen=[];for(let i=0;i<n;i++){const j=Math.floor(Math.random()*a.length);chosen.push(a.splice(j,1)[0])}let times=0;$('#roulette').classList.add('spinning');const interval=setInterval(()=>{$('#roulette').textContent='✦ '+spots[Math.floor(Math.random()*spots.length)].name+' ✦';times++},160);setTimeout(()=>{clearInterval(interval);$('#roulette').classList.remove('spinning');$('#roulette').textContent='✦ '+chosen.map(x=>x.name).join(' / ')+' ✦';show(chosen[0]);if(n>1){const d=document.createElement('div');d.className='buttons';chosen.slice(1).forEach(s=>{const b=document.createElement('button');b.textContent=s.name+' — '+fmt(hours(s));b.onclick=()=>show(s);d.append(b)});$('#result').append(d)}},650)};
+let drawing=false;
+$('#drawBtn').onclick=()=>{
+ if(drawing)return;
+ const candidates=pool();if(!candidates.length)return;
+ const chosen=candidates[Math.floor(Math.random()*candidates.length)];
+ drawing=true;$('#drawBtn').disabled=true;
+ $('#roulette').classList.add('spinning');
+ const cycle=setInterval(()=>{$('#roulette').textContent='✦ '+candidates[Math.floor(Math.random()*candidates.length)].name+' ✦'},170);
+ setTimeout(()=>{
+  clearInterval(cycle);$('#roulette').classList.remove('spinning');
+  $('#roulette').textContent='✦ '+chosen.name+' ✦';
+  show(chosen);drawing=false;$('#drawBtn').disabled=false;
+ },700);
+};
 // Astronomy panel: local date in Japan and approximate lunar phase; recurring shower windows.
 function jstToday(){return new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date())}
 $('#date').value=jstToday();$('#date').onchange=()=>{if(window.__npSkyReady)renderSky()};$('#today').onclick=()=>{$('#date').value=jstToday();renderSky()};
