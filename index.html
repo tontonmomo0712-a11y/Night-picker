@@ -603,16 +603,13 @@ function drawConstellation(forced){
  const pills=document.createElement('div');pills.className='constPills';
  const pillList=[x.season+'の星座',latinNames[x.name]||'全天88星座',skyGroupV10(x),visibleNoteV10(x)];if(zodiacV10.has(x.name))pillList.push('黄道十二星座');
  pillList.forEach(t=>{const b=document.createElement('span');b.textContent=t;pills.append(b)});
- const toggles=document.createElement('div');toggles.className='constTools';
- const starBtn=document.createElement('button');starBtn.textContent='✦ 星の配置だけ';
- const figBtn=document.createElement('button');figBtn.textContent='🎨 本物の星座絵を見る';figBtn.title='オリジナル星座絵を優先し、未収録の星座は歴史的な星座絵を表示';
- toggles.append(starBtn,figBtn);
- const art=document.createElement('div');art.className='constArt';art.innerHTML=constSvg(x);
+ const art=document.createElement('div');art.className='constArt';
  const figure=customConstellationArtPanel(x);
  art.append(figure);
- const legend=document.createElement('p');legend.className='constLegend';legend.textContent='星図は模式図です。40星座はNight Pickerオリジナル星座絵を表示します。その他の星座はWikimedia Commonsの歴史的星座絵を表示します。星座絵は創作を含み、恒星位置や方角を厳密に表した観測用星図ではありません。';
- function toggle(v){figureVisible=v;art.querySelector('svg').style.display=v?'none':'block';figure.style.display=v?'block':'none';if(v)figure.load();starBtn.classList.toggle('active',!v);figBtn.classList.toggle('active',v)}
- starBtn.onclick=()=>toggle(false);figBtn.onclick=()=>toggle(true);toggle(figureVisible);
+ figure.style.display='block';
+ const legend=document.createElement('p');legend.className='constLegend';
+ legend.textContent='40星座はNight Pickerオリジナル星座絵を表示します。その他の星座は歴史的星座絵を検索します。各イラストは学習用であり、実際の恒星の配置・方位を正確に表した観測用星図ではありません。';
+ figure.load();
  const article=document.createElement('div');article.className='constArticle';
  const extras={
  'オリオン座':'オリオンの肩にある赤いベテルギウスは進化の進んだ赤色超巨星、足元の青白いリゲルは高温で明るい超巨星です。三つ星の南側の小三つ星には、肉眼でもぼんやりしたM42オリオン大星雲があります。ここは星が生まれつつある巨大なガス雲で、観測機器がなくても星形成の現場を追体験できる星域です。',
