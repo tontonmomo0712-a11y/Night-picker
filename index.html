@@ -338,8 +338,81 @@ $('#date').value=jstToday();$('#date').onchange=()=>{if(window.__npSkyReady)rend
 const showers=[['しぶんぎ座流星群',1,4,3],['こと座流星群',4,22,4],['みずがめ座η流星群',5,6,5],['みずがめ座δ南流星群',7,30,6],['ペルセウス座流星群',8,13,7],['りゅう座流星群',10,9,4],['オリオン座流星群',10,22,8],['おうし座南流星群',11,5,5],['おうし座北流星群',11,12,5],['しし座流星群',11,17,5],['ふたご座流星群',12,14,7],['こぐま座流星群',12,22,4]];
 function dateDist(m,d,mm,dd){const t=Date.UTC(2025,m-1,d),u=Date.UTC(2025,mm-1,dd);return Math.min(Math.abs(t-u)/86400000,365-Math.abs(t-u)/86400000)}
 function lunar(date){const t=new Date(date+'T12:00:00+09:00');const known=Date.UTC(2000,0,6,18,14);let age=((t.getTime()-known)/86400000)%29.53058867;age=(age+29.53058867)%29.53058867;return {age,illum:(1-Math.cos(2*Math.PI*age/29.53058867))/2}}
+
+/* v15: astronomical highlights from published NAOJ sky calendars (Japan local dates).
+   Verified periods: Oct-Dec 2026 and Jan 2027; older/further dates show approximate annually recurring showers. */
+const verifiedSkyEvents=[
+ ['2026-10-22','オリオン座流星群が極大','極大の前後数日間、夜半から未明が見頃。日本では月没後が比較的好条件。','流星群'],
+ ['2026-10-24','月と土星が接近','見頃を迎えている土星に月が近づいて見えます。宵の南東〜南の空に注目。','月と惑星'],
+ ['2026-10-26','満月','月明かりが強くなります。暗い星雲・天の川より月や明るい惑星が観望向きです。','月'],
+ ['2026-11-06','おうし座南流星群が極大ごろ','11月上旬が見頃。数は少なめですが、比較的明るい流星が現れることがあります。','流星群'],
+ ['2026-11-09','新月','月明かりが少なく、暗い空では銀河・星団の観測を計画しやすい時期です。','月'],
+ ['2026-11-13','おうし座北流星群が極大ごろ','11月上旬から中旬に見頃。夜間の広い空を肉眼で眺めましょう。','流星群'],
+ ['2026-11-15','火星と木星が接近（14〜17日）','真夜中から未明の東の空で、火星と木星が接近して見えます。','惑星'],
+ ['2026-11-18','しし座流星群が極大','日本では18日未明が見頃。暗い空で1時間5個程度が目安です。','流星群'],
+ ['2026-11-21','水星が西方最大離角','日の出前の東〜南東の低空で水星を探しやすい時期。太陽に近いため双眼鏡や望遠鏡の使用は慎重に。','惑星'],
+ ['2026-11-24','満月','月の観察向きの夜。星雲・銀河など淡い天体には月明かりの影響があります。','月'],
+ ['2026-11-26','天王星が衝','天王星が見頃。暗い天体なので詳しい星図と適切な観測機材を使用してください。','惑星'],
+ ['2026-11-30','金星が最大光度','明け方の東〜南東の空で金星が非常に明るく輝きます。','惑星'],
+ ['2026-12-09','新月','月明かりが少なく、冬の星座や星団、淡い天体の観測に適します。','月'],
+ ['2026-12-14','ふたご座流星群が極大（23時頃）','14日深夜から15日未明が見頃。月明かりがなく、暗い空では1時間60個程度も期待できる好条件です。','流星群'],
+ ['2026-12-22','冬至','夜が長い季節。冬の大三角や冬の大六角形など明るい星座を楽しめます。','季節'],
+ ['2026-12-24','2026年で地球に最も近い満月','年内で地球との距離が最も近い満月。見かけの大きさの差は肉眼ではわずかです。','月'],
+ ['2027-01-04','しぶんぎ座流星群が極大（12時頃）','日本での見頃は4日未明。好条件なら1時間15〜20個程度が目安ですが、年による変動が大きい流星群です。','流星群'],
+ ['2027-01-04','金星が西方最大離角','明け方の東の空で、明るい金星を観察しやすい時期です。','惑星'],
+ ['2027-01-08','新月','月明かりの少ない夜。冬の星団・星雲の観測に適しています。','月'],
+ ['2027-01-22','2027年で地球に最も近い満月','満月が地球に比較的近づきます。月を眺める好機ですが、星空観測には月光の影響があります。','月']
+];
+const approximateShowers=[
+ [1,4,'しぶんぎ座流星群'],[4,22,'4月こと座流星群'],[5,6,'みずがめ座η流星群'],
+ [7,30,'みずがめ座δ南流星群'],[8,13,'ペルセウス座流星群'],
+ [10,21,'オリオン座流星群'],[11,12,'おうし座北流星群'],
+ [11,18,'しし座流星群'],[12,14,'ふたご座流星群'],[12,22,'こぐま座流星群']
+];
+function collectedSkyEvents(fromDate,toDate){
+ const yStart=Number(fromDate.slice(0,4)),yEnd=Number(toDate.slice(0,4));
+ const out=verifiedSkyEvents.filter(e=>e[0]>=fromDate&&e[0]<=toDate).map(e=>({date:e[0],title:e[1],tip:e[2],category:e[3],approx:false,source:'https://www.nao.ac.jp/astro/sky/'+e[0].slice(0,4)+'/'+e[0].slice(5,7)+'.html'}));
+ for(let year=yStart;year<=yEnd;year++){
+  for(const [month,day,title] of approximateShowers){
+   if((year===2026&&month>=10)||(year===2027&&month===1))continue;
+   const date=year+'-'+String(month).padStart(2,'0')+'-'+String(day).padStart(2,'0');
+   if(date<fromDate||date>toDate)continue;
+   out.push({date,title:title+'（例年の極大目安）',tip:'例年の極大時期を示します。実際の極大日時・月明かり・流星数は年によって異なります。最新の年次予報を確認してください。',category:'年間の目安',approx:true,source:'https://www.nao.ac.jp/faq/a0502.html'});
+  }
+ }
+ return out.sort((a,b)=>a.date.localeCompare(b.date)||a.title.localeCompare(b.title,'ja'));
+}
+function timelineCard(e,refDate){
+ const item=document.createElement('article');item.className='event';
+ if(e.date<refDate)item.classList.add('pastEvent');
+ const pill=document.createElement('span');pill.className='pill';pill.textContent=e.category+(e.date<refDate?'・経過':'')+(e.approx?'・概略':'');
+ const date=document.createElement('b');date.style.cssText='font-size:12px;color:#a9c9ee;margin-left:8px';
+ const [yy,mm,dd]=e.date.split('-');date.textContent=yy+'年'+Number(mm)+'月'+Number(dd)+'日';
+ const title=document.createElement('h3');title.textContent=e.title;
+ const detail=document.createElement('p');detail.textContent=e.tip;
+ const a=document.createElement('a');a.href=e.source;a.textContent='国立天文台の解説・日付を確認 ↗';a.target='_blank';a.rel='noopener noreferrer';
+ item.append(pill,date,title,detail,a);return item;
+}
+function renderUpcomingEvents(refDate){
+ const [year,month,day]=refDate.split('-').map(Number);
+ const firstMonth=year+'-'+String(month).padStart(2,'0')+'-01';
+ const lastMonth=new Date(Date.UTC(year,month,0)).toISOString().slice(0,10);
+ const firstNext=new Date(Date.UTC(year,month,1)).toISOString().slice(0,10);
+ const horizon=new Date(Date.UTC(year,month-1+3,Math.min(day,28))).toISOString().slice(0,10);
+ const panels=[
+  {id:'monthEvents',from:firstMonth,to:lastMonth},
+  {id:'quarterEvents',from:firstNext,to:horizon}
+ ];
+ panels.forEach(panel=>{
+  const box=$('#'+panel.id);if(!box)return;
+  box.replaceChildren();const events=collectedSkyEvents(panel.from,panel.to);
+  if(!events.length){const p=document.createElement('p');p.className='hint';p.textContent='現在収録している確定的な天文現象はありません。最新の国立天文台の暦もご確認ください。';box.append(p)}
+  else events.forEach(e=>box.append(timelineCard(e,refDate)));
+ });
+}
+
 function renderSky(){const date=$('#date').value;if(!date)return;const [yy,mm,dd]=date.split('-').map(Number),m=lunar(date),age=m.age,illum=Math.round(100*m.illum);let icon=age<1.85||age>=27.68?'🌑':age<5.54?'🌒':age<9.23?'🌓':age<12.92?'🌔':age<16.61?'🌕':age<20.30?'🌖':age<23.99?'🌗':'🌘';let phase=age<1.85||age>=27.68?'新月ごろ':age<9.23?'満ちていく月':age<16.61?'満月に近い月':'欠けていく月';$('#moonIcon').textContent=icon;$('#moonName').textContent=phase;$('#moonAge').textContent=`推定月齢 ${age.toFixed(1)} / 輝面率 約${illum}%`;$('#moonAdvice').textContent=illum<25?'月明かりが少なめ。天の川や淡い星雲を狙いやすい条件です。':illum<65?'月明かりの影響あり。月の沈む時間帯を確認すると観望しやすくなります。':'月明かりが強め。月の観察、明るい星団・惑星、または月没後の星空観望をおすすめします。';const matches=showers.map(s=>({s,dist:dateDist(mm,dd,s[1],s[2])})).filter(x=>x.dist<=x.s[3]).sort((a,b)=>a.dist-b.dist);const events=[];if(yy===2026&&mm===10){if(dd>=19&&dd<=25)events.push({title:'オリオン座流星群（2026年10月22日ごろ極大）',tip:'国立天文台によると前後数日が見頃。22日は月が沈んだ後の未明が比較的有利。暗い空で1時間5〜10個程度が目安です。',tag:'2026年の注目現象'});if(dd>=20&&dd<=28)events.push({title:'土星と月の接近（10月24日）',tip:'土星は10月4日に衝。10月24日には月が近づいて見える見込みです。',tag:'2026年10月の天体配置'})}
-matches.forEach(({s,dist})=>{if(yy===2026&&mm===10&&s[0]==='オリオン座流星群')return;events.push({title:s[0],tip:`例年${s[1]}月${s[2]}日ごろが活動のピーク。観測日はピークから約${Math.round(dist)}日。年による日時の変動があり、天候・月明かりで見え方が変わります。`,tag:'例年の活動期'})});let seasonal=mm>=11||mm<=2?['冬の星座とオリオン大星雲','冬の夜はオリオン座やすばる（プレアデス星団）が好対象。双眼鏡で星団を探すのに向いています。']:mm<=5?['春の星座と北斗七星','北斗七星から春の大曲線へ。明るい銀河は大型望遠鏡向きですが、双眼鏡で星野探索を楽しめます。']:mm<=8?['夏の大三角と天の川','月明かりのない夜に、天の川沿いの星団を双眼鏡で巡ってみてください。']:['秋の星座とアンドロメダ銀河','カシオペヤ座からアンドロメダ銀河を探す季節。暗い空では双眼鏡で淡い広がりを確認できます。'];events.push({title:seasonal[0],tip:seasonal[1],tag:'季節のおすすめ'});const box=$('#events');box.replaceChildren();events.forEach(e=>{const d=document.createElement('div');d.className='event';const badge=document.createElement('span');badge.className='pill';badge.textContent=e.tag;const h=document.createElement('h3');h.textContent=e.title;const p=document.createElement('p');p.textContent=e.tip;d.append(badge,h,p);box.append(d)});$('#observingAdvice').textContent=`${yy}年${mm}月${dd}日：${illum<30?'月明かりの影響は比較的小さそうです。':'月が明るい夜は月没後の時間帯を確認してください。'} 流星群は望遠鏡や双眼鏡で狭い範囲を見るより、肉眼で広い空を見るのが基本です。星団・月のクレーターなどには双眼鏡が役立ちます。正確な天文現象・月出月没は選択日と観測地で公式情報をご確認ください。`}
+matches.forEach(({s,dist})=>{if(yy===2026&&mm===10&&s[0]==='オリオン座流星群')return;events.push({title:s[0],tip:`例年${s[1]}月${s[2]}日ごろが活動のピーク。観測日はピークから約${Math.round(dist)}日。年による日時の変動があり、天候・月明かりで見え方が変わります。`,tag:'例年の活動期'})});let seasonal=mm>=11||mm<=2?['冬の星座とオリオン大星雲','冬の夜はオリオン座やすばる（プレアデス星団）が好対象。双眼鏡で星団を探すのに向いています。']:mm<=5?['春の星座と北斗七星','北斗七星から春の大曲線へ。明るい銀河は大型望遠鏡向きですが、双眼鏡で星野探索を楽しめます。']:mm<=8?['夏の大三角と天の川','月明かりのない夜に、天の川沿いの星団を双眼鏡で巡ってみてください。']:['秋の星座とアンドロメダ銀河','カシオペヤ座からアンドロメダ銀河を探す季節。暗い空では双眼鏡で淡い広がりを確認できます。'];events.push({title:seasonal[0],tip:seasonal[1],tag:'季節のおすすめ'});const box=$('#events');box.replaceChildren();events.forEach(e=>{const d=document.createElement('div');d.className='event';const badge=document.createElement('span');badge.className='pill';badge.textContent=e.tag;const h=document.createElement('h3');h.textContent=e.title;const p=document.createElement('p');p.textContent=e.tip;d.append(badge,h,p);box.append(d)});renderUpcomingEvents(date);$('#observingAdvice').textContent=`${yy}年${mm}月${dd}日：${illum<30?'月明かりの影響は比較的小さそうです。':'月が明るい夜は月没後の時間帯を確認してください。'} 流星群は望遠鏡や双眼鏡で狭い範囲を見るより、肉眼で広い空を見るのが基本です。星団・月のクレーターなどには双眼鏡が役立ちます。正確な天文現象・月出月没は選択日と観測地で公式情報をご確認ください。`}
 renderList();
 
 const constellations=[{"name":"オリオン座","season":"冬","direction":"南","see":"三つ星が目印。M42オリオン大星雲も見どころ。","story":"海神ポセイドンの子とも伝えられる巨人の狩人オリオン。さそりに刺され命を落としたという伝説から、オリオンとさそりは季節を分けて空に現れる。"},{"name":"おうし座","season":"冬","direction":"南","see":"赤いアルデバランとすばるが目印。双眼鏡に最適。","story":"ゼウスが白い牡牛に姿を変えてエウロペを連れ去ったという神話にちなむとされる。"},{"name":"ふたご座","season":"冬","direction":"東〜南","see":"カストルとポルックスが並ぶ。","story":"双子のカストルとポルックス。死すべき兄弟と不死の兄弟が離れることを嫌い、ともに天へ上げられたと伝わる。"},{"name":"ぎょしゃ座","season":"冬","direction":"天頂付近","see":"1等星カペラ。M36・M37・M38の星団。","story":"アテナイ王エリクトニオスが馬車を考案した姿とも伝えられ、空の御者となった。"},{"name":"おおいぬ座","season":"冬","direction":"南","see":"全天最も明るい恒星シリウス。","story":"狩人オリオンの猟犬、またはギリシャ神話の名犬ライラプスと結びつけられる。"},{"name":"こいぬ座","season":"冬","direction":"南東","see":"プロキオンとシリウスで冬の大三角。","story":"オリオンに従う小さな猟犬とされるほか、主人に忠実な犬の伝承とも結びつく。"},{"name":"いっかくじゅう座","season":"冬","direction":"南","see":"冬の大三角の内側。ばら星雲は写真向き。","story":"比較的新しい星座で、古代ギリシャの特定神話ではなく伝説上の一角獣を描く。"},{"name":"エリダヌス座","season":"冬","direction":"南","see":"オリオンの足元から長く続く星の川。","story":"太陽の戦車を暴走させたパエトンが落ちた川だと伝えられる。"},{"name":"かに座","season":"春","direction":"南","see":"プレセペ星団M44が双眼鏡におすすめ。","story":"英雄ヘラクレスと戦うヒュドラを助けようとした蟹が踏みつぶされ、天に上げられたという。"},{"name":"しし座","season":"春","direction":"南","see":"レグルスとしし座の大鎌。","story":"ヘラクレスの十二の難業で倒されたネメアの獅子が星座になったとされる。"},{"name":"おとめ座","season":"春","direction":"南","see":"青白いスピカが目印。","story":"豊穣の女神デメテルや娘ペルセポネ、正義の女神アストライアなど複数の伝承がある。"},{"name":"うしかい座","season":"春","direction":"南〜天頂","see":"オレンジ色のアークトゥルス。","story":"大熊を追う牧人や、農具を発明した人物など、さまざまな伝承が残る。"},{"name":"おおぐま座","season":"春","direction":"北","see":"北斗七星を含む。","story":"ゼウスに愛されたカリストが熊に変えられ、天上の星座になったという。"},{"name":"こぐま座","season":"春","direction":"北","see":"北極星を探す。通年観測可。","story":"おおぐま座と結びつき、カリストの息子アルカスに由来するという伝承がある。"},{"name":"りょうけん座","season":"春","direction":"天頂付近","see":"球状星団M3が有名。","story":"うしかい座が連れる二匹の猟犬。近世に設定された星座で古代の独立した神話はない。"},{"name":"かみのけ座","season":"春","direction":"天頂付近","see":"淡い銀河や星団が多い。","story":"エジプト王妃ベレニケが夫の無事を祈り髪を捧げた伝説による。"},{"name":"からす座","season":"春","direction":"南","see":"小さな四辺形で見つける。","story":"アポロンに嘘を報告したカラスが罰として天に置かれたと伝えられる。"},{"name":"ヘルクレス座","season":"夏","direction":"天頂付近","see":"球状星団M13は双眼鏡・望遠鏡の定番。","story":"十二の難業を成し遂げた半神半人の英雄ヘラクレスの姿。"},{"name":"こと座","season":"夏","direction":"天頂付近","see":"ベガとリング星雲M57。","story":"竪琴の名手オルフェウスが亡妻エウリュディケを取り戻そうと冥府へ向かった物語に結びつく。"},{"name":"わし座","season":"夏","direction":"南","see":"アルタイル。夏の大三角の一角。","story":"ゼウスが姿を変えた鷲、あるいは神の雷を運んだ鷲とされる。"},{"name":"はくちょう座","season":"夏","direction":"天頂付近","see":"デネブと北十字。天の川沿いに星団多数。","story":"ゼウスが白鳥に姿を変えた物語や、友人を探し続けたキュクノスの伝承がある。"},{"name":"さそり座","season":"夏","direction":"南の低空","see":"赤いアンタレスが目印。","story":"驕った狩人オリオンを倒すため女神が送った大サソリ。"},{"name":"いて座","season":"夏","direction":"南の低空","see":"天の川中心方向。M8・M22など見どころ多数。","story":"弓を引くケンタウロスとして描かれ、賢者ケイロンと結びつけられることもある。"},{"name":"へびつかい座","season":"夏","direction":"南","see":"へび座と一体で探す大きな星座。","story":"名医アスクレピオスが死者を蘇らせたため雷に打たれ、天に上げられたとされる。"},{"name":"いるか座","season":"夏","direction":"南東","see":"小さなひし形がかわいい。","story":"海の神ポセイドンの求婚を取り持ったイルカが天に上げられたと伝わる。"},{"name":"りゅう座","season":"夏","direction":"北","see":"北極星を取り囲む長い星の列。","story":"黄金の林檎を守る竜ラドンとされ、ヘラクレスの難業に登場する。"},{"name":"ペガスス座","season":"秋","direction":"南","see":"秋の四辺形が目印。","story":"英雄ペルセウスがメドゥーサを倒した際、血から生まれた翼を持つ天馬ペガスス。"},{"name":"アンドロメダ座","season":"秋","direction":"天頂付近","see":"アンドロメダ銀河M31。双眼鏡向き。","story":"母カシオペヤの自慢の罰で怪物のいけにえにされた王女を、英雄ペルセウスが救った。"},{"name":"カシオペヤ座","season":"秋","direction":"北","see":"W字の5つ星。通年見やすい。","story":"美しさを自慢し海の妖精の怒りを買った王妃カシオペヤ。"},{"name":"ケフェウス座","season":"秋","direction":"北","see":"五角形の家形で探す。","story":"カシオペヤの夫でアンドロメダの父であるエチオピア王。"},{"name":"ペルセウス座","season":"秋","direction":"北東","see":"二重星団h-χが双眼鏡で華やか。","story":"メドゥーサを倒し、怪物からアンドロメダを救った英雄。"},{"name":"うお座","season":"秋","direction":"南","see":"秋の四辺形の南側に淡い星列。","story":"アフロディテとエロスが怪物テュポンから逃れるため魚になった伝承。"},{"name":"みずがめ座","season":"秋","direction":"南","see":"明るい星が少なく秋の空で探す。","story":"美少年ガニュメデスがゼウスに天へ連れ去られ神々の給仕になった神話。"},{"name":"やぎ座","season":"秋","direction":"南","see":"逆三角形を探す。","story":"牧神パンが怪物から逃げ、水中に入った半身が魚となった姿とされる。"},{"name":"くじら座","season":"秋","direction":"南","see":"変光星ミラで知られる。","story":"アンドロメダを襲うため海神が送った海の怪物ケートス。"},{"name":"みなみのうお座","season":"秋","direction":"南の低空","see":"1等星フォーマルハウト。","story":"水瓶から注がれる水を受ける魚として古代の星図に描かれた。"}];
