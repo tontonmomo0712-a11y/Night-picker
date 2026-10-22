@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#080c18"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Night Picker"><title>Night Picker v14.0 | 星空・夜景と88星座図鑑</title>
+<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#080c18"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Night Picker"><title>Night Picker v15.0 | 星空・夜景と88星座図鑑</title>
 <style>
 .slideRow{display:flex;align-items:center;gap:12px}.slideRow input{flex:1;min-width:0;accent-color:#a9ccff;cursor:pointer}.slideRow strong{min-width:72px;font-size:13px;color:#c5dcff} .constTools{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:14px 0}.constTools button{padding:9px 12px;border:1px solid #456185;border-radius:10px;background:#142840;color:#e3eeff;cursor:pointer}.constTools button.active{background:#4467ac;color:white}.constTools select,.constTools input{min-width:0;flex:1;padding:9px;background:#111d33;color:white;border:1px solid #3f5472;border-radius:9px}.constHero{position:relative}.constFigure{position:absolute;inset:0;pointer-events:none;opacity:.66;transition:.2s}.constLegend{font-size:11px;color:#acc3e7;margin:5px 0 12px}.constArt{position:relative}.constArt svg{display:block}.constArticle p{line-height:1.95;font-size:14px}.constArticle h4{margin:19px 0 7px;color:#b5d8ff;font-size:16px}.constArticle{max-width:850px}.sourcesNotes a{color:#a6d7ff}
 
@@ -89,7 +89,7 @@ window.addEventListener('error',function(ev){
  var out=document.getElementById('npErrorText');out.textContent=ev.message||'不明なエラー';
 });
 </script>
-</head><body><main><header><h1>✦ Night Picker <span style="font-size:14px;color:#abc5ea">v14.0</span></h1><p>全国47都道府県の星空・夜景スポットを大幅拡充。移動時間と今夜の空から、行き先を決める。</p><p style="font-size:12px;margin:9px 0 0"><a href="/?v=20261023-140" style="color:#b9d6ff">↻ 最新版を読み込み直す</a>　・　<a href="/version.html?v=20261023-140" style="color:#b9d6ff">公開バージョンを確認</a></p></header>
+</head><body><main><header><h1>✦ Night Picker <span style="font-size:14px;color:#abc5ea">v15.0</span></h1><p>全国47都道府県の星空・夜景スポットを大幅拡充。移動時間と今夜の空から、行き先を決める。</p><p style="font-size:12px;margin:9px 0 0"><a href="/?v=20261023-150" style="color:#b9d6ff">↻ 最新版を読み込み直す</a>　・　<a href="/version.html?v=20261023-150" style="color:#b9d6ff">公開バージョンを確認</a></p></header>
 <div id="npEnvironmentCheck" role="alert"><strong>⚠ HTMLプレビューでは操作できない可能性があります</strong>
 画面は表示されていますが、抽選・星座図鑑・天気予報を動かすJavaScriptが起動していません。<b>ChatGPTのファイルプレビューやiPhoneの「ファイル」アプリで開いている場合</b>、HTML表示だけできて操作が動かないことがあります。Safariで開けるようにWebサイトとして公開するか、JavaScript対応HTMLビューアで開いてください。プルダウンだけ反応するのはこの状態の典型例です。</div>
 <nav><button class="active" data-view="draw">🎲 スポット抽選</button><button data-view="sky">🔭 今日の天体・月齢</button></nav>
@@ -103,7 +103,7 @@ window.addEventListener('error',function(ev){
 </aside><article class="panel"><div class="roulette" id="roulette">どこへ行こう？</div><div id="result" class="result"><div class="empty"><div class="emoji">🌌</div>抽選ボタンを押して、今夜の行き先を決めよう。</div></div><h2 class="sectionTitle" style="margin-top:25px">候補一覧 <span id="listCount" class="subtle"></span></h2><div id="list" class="searchResults"></div></article></div></section>
 <section id="sky" class="sectionNav"><div class="panel"><div class="datebar"><strong>📅 観測する日</strong><input type="date" id="date" class="control"><button class="smallbtn" id="today">今日に戻す</button></div><div class="astroGrid"><section class="panel" style="box-shadow:none"><h2 class="sectionTitle">🌙 月齢と月明かり</h2><div class="moonCard"><div class="moonIcon" id="moonIcon">🌘</div><div><div id="moonName" style="font-weight:800;font-size:20px"></div><div id="moonAge" class="meta"></div><p id="moonAdvice" class="detail"></p></div></div><div class="alert">月齢と照明率は簡易計算による参考値。月出・月没時刻、正確な月の位置は国立天文台で確認してください。</div></section><section class="panel" style="box-shadow:none"><h2 class="sectionTitle">✨ 選択日の見どころ</h2><div id="events"></div><h3 class="eventPeriodTitle">📅 今月の天体現象</h3><div id="monthEvents" class="eventTimeline"></div><h3 class="eventPeriodTitle">🔭 今後3か月以内の天体現象</h3><div id="quarterEvents" class="eventTimeline"></div><p class="hint">天体現象は日本時間の概略を表示しています。流星群の極大や観望条件は年ごとに変わります。彗星などの突発現象は専門サイトで最新情報をご確認ください。</p></section></div>
 <div class="panel" style="margin-top:15px;box-shadow:none" id="forecastPanel">
-  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px"><div><h2 class="sectionTitle">☁️ 全国の星空観測に適した天気予報 <span style="font-size:11px;color:#a6c9f7">v14.0</span></h2><p class="subtle">選択した日付の19時〜翌3時（日本時間）を、12地方の代表地点で比較します。</p></div><button class="smallbtn" id="weatherRefresh">↻ 予報を更新</button></div>
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px"><div><h2 class="sectionTitle">☁️ 全国の星空観測に適した天気予報 <span style="font-size:11px;color:#a6c9f7">v15.0</span></h2><p class="subtle">選択した日付の19時〜翌3時（日本時間）を、12地方の代表地点で比較します。</p></div><button class="smallbtn" id="weatherRefresh">↻ 予報を更新</button></div>
   <p id="forecastStatus" class="detail" role="status">予報を取得していません。</p>
   <div id="weatherSummary" class="detail"></div><div id="weatherRegions" class="weatherGrid"></div>
   <p class="hint">評価は代表地点の予測雲量・降水確率・風速から計算した参考指数です。各地方の全域を表すものではありません。街明かり、山の雲・霧、月齢、実際の現地天候は別途確認してください。遠い日付は予報が未提供です。</p>
@@ -657,7 +657,7 @@ function appendSourcesV10(box,x){
  box.append(src);
 }
 
-let lastConst='',currentConst=null,figureVisible=false,allConstMode=false;
+let lastConst='',currentConst=null,allConstMode=false;
 const constellationNameSet=[...constellations].sort((a,b)=>a.name.localeCompare(b.name,'ja'));
 const nameSelector=document.querySelector('#constSelect');
 document.querySelectorAll('#constFilters button').forEach(b=>b.addEventListener('click',()=>{constFilterV10=b.dataset.cat;syncConstBrowseV10();drawConstellation();}));
@@ -701,7 +701,7 @@ function drawConstellation(forced){
  addReaderV10(article,x);
  const more=document.createElement('div');more.className='sourcesNotes';more.innerHTML=`<a href="https://ja.wikipedia.org/wiki/${encodeURIComponent(x.name)}" target="_blank" rel="noopener">Wikipedia：${x.name} ↗</a>　 ·　<a href="https://www.nao.ac.jp/" target="_blank" rel="noopener">国立天文台 ↗</a>　 ·　<a href="https://www.iau.org/IAU/IAU/Astronomy-FAQs/Constellations.aspx" target="_blank" rel="noopener">IAUの88星座 ↗</a>`;
  const note=document.createElement('p');note.className='hint';note.textContent='※季節・北天/南天分類・国内での観測しやすさは学習用の概略です。星座の実際の高度・見え方は日時と緯度・方角で変化します。一部の星座は概説中心で、詳細な恒星データは順次整備します。';
- box.append(h,m,pills,toggles,art,legend,article,more);appendSourcesV10(box,x);box.append(note);
+ box.append(h,m,pills,art,legend,article,more);appendSourcesV10(box,x);box.append(note);
 }
 $('#nextConst').onclick=()=>drawConstellation();
 $('#date').addEventListener('change',()=>{if(window.__npSkyReady){syncConstBrowseV10();drawConstellation()}});
