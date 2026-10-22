@@ -47,6 +47,24 @@ button,a{touch-action:manipulation}
 .spotIntro p{margin:0;line-height:1.9}
 .spotIntro .ref{margin-top:9px;font-size:12px}
 
+
+/* v15: visited / favorite controls */
+.recordFilters,.spotRecordButtons{display:flex;gap:7px;flex-wrap:wrap}
+.recordFilters button,.spotRecordToggle,.recordMini{border:1px solid #405a7e;background:#132544;color:#c8ddf7;border-radius:10px;padding:9px 10px;font-size:12px}
+.recordFilters button.active,.spotRecordToggle.marked{background:#284f82;border-color:#8ebfff;color:#fff}
+.recordMini{font-size:21px;padding:4px 10px;min-width:39px;flex:0 0 auto}
+.spotRecord{background:#101c30;border:1px solid #405675;border-radius:15px;padding:15px;margin:12px 0}
+.spotRecordTitle{font-weight:800;color:#d6e8ff;font-size:17px;margin-bottom:10px}
+.spotRecordButtons button{font-size:14px;padding:10px 15px}
+.visitDateRow,.spotMemoLabel{display:flex;flex-direction:column;align-items:flex-start;gap:6px;margin-top:13px;color:#bbd1ef;font-size:13px}
+.visitDateRow input,.spotMemoLabel textarea{color:#e5f0ff;background:#0c1629;border:1px solid #3a5379;border-radius:10px;padding:10px;font:inherit;max-width:100%}
+.spotMemoLabel textarea{width:100%;resize:vertical;line-height:1.6}
+.eventPeriodTitle{color:#d4e6ff;font-size:16px;padding:12px 0 7px;margin:14px 0 4px;border-top:1px solid #364969}
+.eventTimeline .event{padding:11px 0}
+.eventTimeline .event h3{font-size:15px;margin:5px 0 6px;color:#dce9ff}
+.eventTimeline .event p{font-size:13px;color:#bbcee8;line-height:1.7;margin:4px 0}
+.eventTimeline a{color:#a9d7ff;font-size:12px}
+.eventTimeline .pastEvent{opacity:.64}
 </style>
 <style>
 .weatherGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(218px,1fr));gap:11px;margin:14px 0}
@@ -79,10 +97,11 @@ window.addEventListener('error',function(ev){
 <div class="field"><label>出発地点（所要時間の基準）</label><select id="origin" class="control"><option value="toy">豊洲駅（東京）</option><option value="tok">東京駅</option><option value="shi">新宿駅</option><option value="osa">大阪駅</option><option value="nag">名古屋駅</option><option value="hak">博多駅</option><option value="sap">札幌駅</option><option value="loc">現在地を取得</option></select><div id="originHint" class="minor">道路距離を推定した概算時間です。渋滞・高速利用条件は未反映。</div></div>
 <div class="field"><label>目的</label><div class="chips" id="typeChips"><button class="chip active" data-type="すべて">✨ 両方</button><button class="chip" data-type="星空">🌌 星空</button><button class="chip" data-type="夜景">🌃 夜景</button></div></div>
 <div class="field"><label>エリア（大まかな地方別）</label><select id="region" class="control"><option value="">全国すべて</option></select></div>
+<div class="field" id="recordFilterArea"><label>📍 訪問記録から絞り込む</label><div class="recordFilters" id="recordFilters"><button type="button" class="active" data-record="all">すべて</button><button type="button" data-record="favorite">★ お気に入り</button><button type="button" data-record="visited">✓ 行った</button><button type="button" data-record="unvisited">未訪問</button></div><p class="hint" id="recordSummary">このSafari内で記録します。</p></div>
 <div class="field"><label>推定車移動時間の上限</label><div class="slideRow"><input type="range" id="maxTime" min="1" max="12" value="12" step="1" aria-label="最大所要時間"><strong id="maxTimeValue">12時間以内</strong></div><div class="hint">1〜12時間の範囲で候補を絞り込みます。</div></div>
 <button class="primary" id="drawBtn">行き先をランダム抽選 ✦</button><p id="count" class="minor"></p><p class="hint">条件に合う候補から1か所を均等確率で抽選します。候補一覧は推定所要時間が短い順です。</p>
 </aside><article class="panel"><div class="roulette" id="roulette">どこへ行こう？</div><div id="result" class="result"><div class="empty"><div class="emoji">🌌</div>抽選ボタンを押して、今夜の行き先を決めよう。</div></div><h2 class="sectionTitle" style="margin-top:25px">候補一覧 <span id="listCount" class="subtle"></span></h2><div id="list" class="searchResults"></div></article></div></section>
-<section id="sky" class="sectionNav"><div class="panel"><div class="datebar"><strong>📅 観測する日</strong><input type="date" id="date" class="control"><button class="smallbtn" id="today">今日に戻す</button></div><div class="astroGrid"><section class="panel" style="box-shadow:none"><h2 class="sectionTitle">🌙 月齢と月明かり</h2><div class="moonCard"><div class="moonIcon" id="moonIcon">🌘</div><div><div id="moonName" style="font-weight:800;font-size:20px"></div><div id="moonAge" class="meta"></div><p id="moonAdvice" class="detail"></p></div></div><div class="alert">月齢と照明率は簡易計算による参考値。月出・月没時刻、正確な月の位置は国立天文台で確認してください。</div></section><section class="panel" style="box-shadow:none"><h2 class="sectionTitle">✨ 今日の見どころ</h2><div id="events"></div></section></div>
+<section id="sky" class="sectionNav"><div class="panel"><div class="datebar"><strong>📅 観測する日</strong><input type="date" id="date" class="control"><button class="smallbtn" id="today">今日に戻す</button></div><div class="astroGrid"><section class="panel" style="box-shadow:none"><h2 class="sectionTitle">🌙 月齢と月明かり</h2><div class="moonCard"><div class="moonIcon" id="moonIcon">🌘</div><div><div id="moonName" style="font-weight:800;font-size:20px"></div><div id="moonAge" class="meta"></div><p id="moonAdvice" class="detail"></p></div></div><div class="alert">月齢と照明率は簡易計算による参考値。月出・月没時刻、正確な月の位置は国立天文台で確認してください。</div></section><section class="panel" style="box-shadow:none"><h2 class="sectionTitle">✨ 選択日の見どころ</h2><div id="events"></div><h3 class="eventPeriodTitle">📅 今月の天体現象</h3><div id="monthEvents" class="eventTimeline"></div><h3 class="eventPeriodTitle">🔭 今後3か月以内の天体現象</h3><div id="quarterEvents" class="eventTimeline"></div><p class="hint">天体現象は日本時間の概略を表示しています。流星群の極大や観望条件は年ごとに変わります。彗星などの突発現象は専門サイトで最新情報をご確認ください。</p></section></div>
 <div class="panel" style="margin-top:15px;box-shadow:none" id="forecastPanel">
   <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px"><div><h2 class="sectionTitle">☁️ 全国の星空観測に適した天気予報 <span style="font-size:11px;color:#a6c9f7">v14.0</span></h2><p class="subtle">選択した日付の19時〜翌3時（日本時間）を、12地方の代表地点で比較します。</p></div><button class="smallbtn" id="weatherRefresh">↻ 予報を更新</button></div>
   <p id="forecastStatus" class="detail" role="status">予報を取得していません。</p>
@@ -117,21 +136,86 @@ spots.forEach(p=>{const v=sourceUpdates.find(x=>p.name.includes(x.word));if(v){p
 const prefs=["北海道", "青森", "岩手", "宮城", "秋田", "山形", "福島", "茨城", "栃木", "群馬", "埼玉", "千葉", "東京", "神奈川", "新潟", "富山", "石川", "福井", "山梨", "長野", "岐阜", "静岡", "愛知", "三重", "滋賀", "京都", "大阪", "兵庫", "奈良", "和歌山", "鳥取", "島根", "岡山", "広島", "山口", "徳島", "香川", "愛媛", "高知", "福岡", "佐賀", "長崎", "熊本", "大分", "宮崎", "鹿児島", "沖縄"];
 const originPoints={toy:[35.654,139.795,'豊洲駅'],tok:[35.681,139.767,'東京駅'],shi:[35.690,139.700,'新宿駅'],osa:[34.702,135.495,'大阪駅'],nag:[35.171,136.881,'名古屋駅'],hak:[33.590,130.420,'博多駅'],sap:[43.069,141.351,'札幌駅']};
 let origin=[...originPoints.toy],type='すべて',selected=null, geo=null;
+
+/* v15: per-device visited, favorite and notes; no account/cloud or location history. */
+const spotRecordStorageKey='night-picker:spot-records:v1';
+let spotRecords={};
+try{const saved=JSON.parse(localStorage.getItem(spotRecordStorageKey)||'{}');if(saved&&typeof saved==='object'&&!Array.isArray(saved))spotRecords=saved}catch(e){}
+let recordView='all';
+const spotRecordKey=s=>s.pref+'｜'+s.name;
+const spotRecord=s=>spotRecords[spotRecordKey(s)]||{};
+function persistSpotRecords(){
+ try{localStorage.setItem(spotRecordStorageKey,JSON.stringify(spotRecords));return true}catch(e){return false}
+}
+function updateSpotRecord(s,field,value){
+ const key=spotRecordKey(s),before=spotRecords[key]||{},after={...before};
+ if(field==='visited'){after.visited=!!value;if(value&&!after.visitedOn)after.visitedOn=jstToday()}
+ else if(field==='favorite')after.favorite=!!value;
+ else if(field==='visitedOn')after.visitedOn=String(value||'').slice(0,10);
+ else if(field==='note')after.note=String(value||'').slice(0,500);
+ spotRecords[key]=after;
+ persistSpotRecords();
+ renderList();
+ refreshRecordButtons();
+}
+function recordTally(){let visited=0,favorite=0;for(const s of spots){const rec=spotRecord(s);if(rec.visited)visited++;if(rec.favorite)favorite++}return {visited,favorite}}
+function refreshRecordButtons(){
+ document.querySelectorAll('[data-status-for]').forEach(btn=>{
+  const s=spots.find(p=>spotRecordKey(p)===btn.dataset.statusFor);
+  if(!s)return;const rec=spotRecord(s);
+  const flag=btn.dataset.flag;
+  const on=!!rec[flag];
+  btn.classList.toggle('marked',on);
+  btn.setAttribute('aria-pressed',String(on));
+  btn.textContent=flag==='visited'?(on?'✓ 行った':'○ 行った'):(on?'★ お気に入り':'☆ お気に入り');
+ });
+}
+function buildSpotRecordPanel(s){
+ const panel=document.createElement('section');panel.className='spotRecord';
+ const header=document.createElement('div');header.className='spotRecordTitle';header.textContent='📌 このスポットの記録';panel.append(header);
+ const buttons=document.createElement('div');buttons.className='spotRecordButtons';
+ ['favorite','visited'].forEach(field=>{
+  const b=document.createElement('button');b.type='button';b.className='smallbtn spotRecordToggle';
+  b.dataset.statusFor=spotRecordKey(s);b.dataset.flag=field;
+  b.onclick=()=>{updateSpotRecord(s,field,!spotRecord(s)[field]);syncVisitDate()};
+  buttons.append(b);
+ });panel.append(buttons);
+ const dateRow=document.createElement('label');dateRow.className='visitDateRow';
+ dateRow.textContent='訪問日（任意）';
+ const input=document.createElement('input');input.type='date';input.value=spotRecord(s).visitedOn||'';
+ input.onchange=()=>updateSpotRecord(s,'visitedOn',input.value);
+ dateRow.append(input);panel.append(dateRow);
+ const memoLabel=document.createElement('label');memoLabel.className='spotMemoLabel';
+ memoLabel.textContent='メモ（景色・天気・次に行きたい理由など）';
+ const memo=document.createElement('textarea');memo.rows=3;memo.maxLength=500;memo.placeholder='自分用のメモを残せます（500文字以内）';
+ memo.value=spotRecord(s).note||'';
+ let saveTimer=null;
+ memo.oninput=()=>{clearTimeout(saveTimer);saveTimer=setTimeout(()=>{const key=spotRecordKey(s);spotRecords[key]={...spotRecord(s),note:memo.value.slice(0,500)};persistSpotRecords()},200)};
+ memo.onblur=()=>{clearTimeout(saveTimer);spotRecords[spotRecordKey(s)]={...spotRecord(s),note:memo.value.slice(0,500)};persistSpotRecords()};
+ memoLabel.append(memo);panel.append(memoLabel);
+ const foot=document.createElement('p');foot.className='hint';foot.textContent='このSafariの端末内に自動保存します。ほかの端末への同期はありません。履歴・サイトデータを削除すると消える場合があります。';panel.append(foot);
+ function syncVisitDate(){const rec=spotRecord(s);dateRow.style.display=rec.visited?'flex':'none';input.value=rec.visitedOn||'';}
+ syncVisitDate();
+ setTimeout(refreshRecordButtons,0);
+ return panel;
+}
+
 const $=q=>document.querySelector(q);const $$=q=>[...document.querySelectorAll(q)];
 const regions={"北海道": ["北海道"], "東北": ["青森", "岩手", "宮城", "秋田", "山形", "福島"], "北関東": ["茨城", "栃木", "群馬"], "南関東": ["埼玉", "千葉", "東京", "神奈川"], "甲信越": ["新潟", "山梨", "長野"], "北陸": ["富山", "石川", "福井"], "東海": ["岐阜", "静岡", "愛知", "三重"], "関西": ["滋賀", "京都", "大阪", "兵庫", "奈良", "和歌山"], "中国": ["鳥取", "島根", "岡山", "広島", "山口"], "四国": ["徳島", "香川", "愛媛", "高知"], "九州": ["福岡", "佐賀", "長崎", "熊本", "大分", "宮崎", "鹿児島"], "沖縄": ["沖縄"]};
 Object.keys(regions).forEach(r=>{const o=document.createElement('option');o.value=o.textContent=r;$('#region').appendChild(o)});
 $$('nav button').forEach(b=>b.onclick=()=>{$$('nav button').forEach(x=>x.classList.toggle('active',x===b));$$('.sectionNav').forEach(x=>x.classList.toggle('active',x.id===b.dataset.view));if(b.dataset.view==='sky'){renderSky();if(!window.__npSkyReady){window.__npSkyReady=true;drawConstellation()}fetchWeather()}});
 $$('#typeChips .chip').forEach(b=>b.onclick=()=>{type=b.dataset.type;$$('#typeChips .chip').forEach(x=>x.classList.toggle('active',x===b));renderList()});
 $('#origin').onchange=()=>{let v=$('#origin').value;if(v==='loc'){if(!navigator.geolocation){$('#originHint').textContent='現在地の取得に非対応です。';return}$('#originHint').textContent='現在地を取得中…（ブラウザの許可が必要）';navigator.geolocation.getCurrentPosition(p=>{origin=[p.coords.latitude,p.coords.longitude,'現在地'];$('#originHint').textContent='現在地基準で概算しました。正確なルートではありません。';renderList()},e=>{$('#originHint').textContent='取得できませんでした。HTTPSでの利用が必要な場合があります。';$('#origin').value='toy';origin=[...originPoints.toy];renderList()},{timeout:9000})}else{origin=[...originPoints[v]];$('#originHint').textContent='道路距離を推定した概算時間です。渋滞・高速利用条件は未反映。';renderList()}};
-$('#region').onchange=renderList;let sliderTimer;$('#maxTime').oninput=()=>{let v=+$('#maxTime').value;$('#maxTimeValue').textContent=v+'時間以内';clearTimeout(sliderTimer);sliderTimer=setTimeout(renderList,130)};$('#maxTime').onchange=()=>{clearTimeout(sliderTimer);renderList()};
+$('#region').onchange=renderList;
+document.querySelectorAll('#recordFilters button').forEach(b=>b.onclick=()=>{recordView=b.dataset.record;document.querySelectorAll('#recordFilters button').forEach(x=>x.classList.toggle('active',x===b));renderList()});let sliderTimer;$('#maxTime').oninput=()=>{let v=+$('#maxTime').value;$('#maxTimeValue').textContent=v+'時間以内';clearTimeout(sliderTimer);sliderTimer=setTimeout(renderList,130)};$('#maxTime').onchange=()=>{clearTimeout(sliderTimer);renderList()};
 function km(a,b,c,d){const r=6371,x=(c-a)*Math.PI/180,y=(d-b)*Math.PI/180;const z=Math.sin(x/2)**2+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(y/2)**2;return 2*r*Math.atan2(Math.sqrt(z),Math.sqrt(1-z))}
 let travelCache=new WeakMap(),cachedOriginKey='';
 function hours(s){let key=origin[0]+','+origin[1];if(key!==cachedOriginKey){travelCache=new WeakMap();cachedOriginKey=key}let v=travelCache.get(s);if(v!==undefined)return v;const d=km(origin[0],origin[1],s.lat,s.lon);v=.25+d*1.30/65+(d<40?d/90:0);travelCache.set(s,v);return v}
 function fmt(h){if(h<1)return '約'+Math.max(10,Math.round(h*60/10)*10)+'分';const n=Math.round(h*2)/2;return '約'+(Number.isInteger(n)?n:n.toFixed(1))+'時間'}
-function pool(){const m=+$('#maxTime').value,region=$('#region').value;return spots.filter(s=>(!region||regions[region].includes(s.pref))&&(type==='すべて'||type===s.type)&&(hours(s)<=m)).sort((a,b)=>hours(a)-hours(b))}
+function pool(){const m=+$('#maxTime').value,region=$('#region').value;return spots.filter(s=>(!region||regions[region].includes(s.pref))&&(type==='すべて'||type===s.type)&&(hours(s)<=m)&&(recordView==='all'||(recordView==='favorite'&&spotRecord(s).favorite)||(recordView==='visited'&&spotRecord(s).visited)||(recordView==='unvisited'&&!spotRecord(s).visited))).sort((a,b)=>hours(a)-hours(b))}
 let displayedLimit=35, lastListPool=[];
-function appendListChunk(){const list=$('#list');const batch=lastListPool.slice(list.querySelectorAll('.item').length,displayedLimit);const frag=document.createDocumentFragment();for(const s of batch){const d=document.createElement('div');d.className='item';const label=document.createElement('span');label.textContent=`${s.pref}｜${s.name}（${s.type}） — ${fmt(hours(s))}`;const b=document.createElement('button');b.textContent='詳細';b.onclick=()=>show(s);d.append(label,b);frag.append(d)}list.append(frag);let more=$('#moreDestinations');if(!more){more=document.createElement('button');more.id='moreDestinations';more.className='smallbtn';more.style.cssText='margin:10px 0;width:100%';more.onclick=()=>{displayedLimit+=35;appendListChunk()};list.after(more)}const remaining=lastListPool.length-list.querySelectorAll('.item').length;more.hidden=remaining<=0;more.textContent=`残り${remaining}か所を表示（次の35件）`}
-function renderList(){const a=pool();lastListPool=a;displayedLimit=35;$('#count').textContent=`対象：${a.length}か所 / 全${spots.length}か所（追加地点の時間は県代表点の参考値）`;$('#listCount').textContent=a.length+'か所';$('#drawBtn').disabled=!a.length;$('#list').replaceChildren();if(!a.length){$('#list').textContent='該当するスポットがありません。条件を緩めてください。';const more=$('#moreDestinations');if(more)more.hidden=true;return}appendListChunk()}
+function appendListChunk(){const list=$('#list');const batch=lastListPool.slice(list.querySelectorAll('.item').length,displayedLimit);const frag=document.createDocumentFragment();for(const s of batch){const d=document.createElement('div');d.className='item';const label=document.createElement('span');label.textContent=`${s.pref}｜${s.name}（${s.type}） — ${fmt(hours(s))}`;const b=document.createElement('button');b.textContent='詳細';b.onclick=()=>show(s);const fav=document.createElement('button');fav.className='recordMini';fav.type='button';fav.title='お気に入りを切り替える';fav.textContent=spotRecord(s).favorite?'★':'☆';fav.setAttribute('aria-pressed',String(!!spotRecord(s).favorite));fav.onclick=()=>updateSpotRecord(s,'favorite',!spotRecord(s).favorite);d.append(label,fav,b);frag.append(d)}list.append(frag);let more=$('#moreDestinations');if(!more){more=document.createElement('button');more.id='moreDestinations';more.className='smallbtn';more.style.cssText='margin:10px 0;width:100%';more.onclick=()=>{displayedLimit+=35;appendListChunk()};list.after(more)}const remaining=lastListPool.length-list.querySelectorAll('.item').length;more.hidden=remaining<=0;more.textContent=`残り${remaining}か所を表示（次の35件）`}
+function renderList(){const a=pool();lastListPool=a;displayedLimit=35;$('#count').textContent=`対象：${a.length}か所 / 全${spots.length}か所（追加地点の時間は県代表点の参考値）`;const tally=recordTally();$('#recordSummary').textContent=`記録：★ お気に入り ${tally.favorite}件 ／ ✓ 行った ${tally.visited}件（この端末内に保存）`;$('#listCount').textContent=a.length+'か所';$('#drawBtn').disabled=!a.length;$('#list').replaceChildren();if(!a.length){$('#list').textContent='該当するスポットがありません。条件を緩めてください。';const more=$('#moreDestinations');if(more)more.hidden=true;return}appendListChunk()}
 
 
 // Photo lookup loads only for the selected destination; attribution stays beside the image.
@@ -232,7 +316,7 @@ function show(s){
  hero.querySelector('#photoLink').href=googlePlaceLink(s);
  hero.querySelector('#skyGo').onclick=()=>$('nav button[data-view="sky"]').click();
  $('#result').append(hero);
- hero.querySelector('.media').append(spotPhotoPreview(s));
+ hero.querySelector('.media').append(spotPhotoPreview(s));hero.querySelector('.spotIntro').after(buildSpotRecordPanel(s));
 }
 let drawing=false;
 $('#drawBtn').onclick=()=>{
