@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#080c18"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Night Picker"><title>Night Picker v10.2 | 星空・夜景と88星座図鑑</title>
+<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#080c18"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Night Picker"><title>Night Picker v11.0 | 星空・夜景と88星座図鑑</title>
 <style>
 .slideRow{display:flex;align-items:center;gap:12px}.slideRow input{flex:1;min-width:0;accent-color:#a9ccff;cursor:pointer}.slideRow strong{min-width:72px;font-size:13px;color:#c5dcff} .constTools{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:14px 0}.constTools button{padding:9px 12px;border:1px solid #456185;border-radius:10px;background:#142840;color:#e3eeff;cursor:pointer}.constTools button.active{background:#4467ac;color:white}.constTools select,.constTools input{min-width:0;flex:1;padding:9px;background:#111d33;color:white;border:1px solid #3f5472;border-radius:9px}.constHero{position:relative}.constFigure{position:absolute;inset:0;pointer-events:none;opacity:.66;transition:.2s}.constLegend{font-size:11px;color:#acc3e7;margin:5px 0 12px}.constArt{position:relative}.constArt svg{display:block}.constArticle p{line-height:1.95;font-size:14px}.constArticle h4{margin:19px 0 7px;color:#b5d8ff;font-size:16px}.constArticle{max-width:850px}.sourcesNotes a{color:#a6d7ff}
 
@@ -55,7 +55,7 @@ window.addEventListener('error',function(ev){
  var out=document.getElementById('npErrorText');out.textContent=ev.message||'不明なエラー';
 });
 </script>
-</head><body><main><header><h1>✦ Night Picker <span style="font-size:14px;color:#abc5ea">v10.2</span></h1><p>全国47都道府県の星空・夜景スポットを大幅拡充。移動時間と今夜の空から、行き先を決める。</p><p style="font-size:12px;margin:9px 0 0"><a href="/?v=20261022-102" style="color:#b9d6ff">↻ 最新版を読み込み直す</a>　・　<a href="/version.html?v=20261022-102" style="color:#b9d6ff">公開バージョンを確認</a></p></header>
+</head><body><main><header><h1>✦ Night Picker <span style="font-size:14px;color:#abc5ea">v11.0</span></h1><p>全国47都道府県の星空・夜景スポットを大幅拡充。移動時間と今夜の空から、行き先を決める。</p><p style="font-size:12px;margin:9px 0 0"><a href="/?v=20261023-110" style="color:#b9d6ff">↻ 最新版を読み込み直す</a>　・　<a href="/version.html?v=20261023-110" style="color:#b9d6ff">公開バージョンを確認</a></p></header>
 <div id="npEnvironmentCheck" role="alert"><strong>⚠ HTMLプレビューでは操作できない可能性があります</strong>
 画面は表示されていますが、抽選・星座図鑑・天気予報を動かすJavaScriptが起動していません。<b>ChatGPTのファイルプレビューやiPhoneの「ファイル」アプリで開いている場合</b>、HTML表示だけできて操作が動かないことがあります。Safariで開けるようにWebサイトとして公開するか、JavaScript対応HTMLビューアで開いてください。プルダウンだけ反応するのはこの状態の典型例です。</div>
 <nav><button class="active" data-view="draw">🎲 スポット抽選</button><button data-view="sky">🔭 今日の天体・月齢</button></nav>
@@ -70,7 +70,7 @@ window.addEventListener('error',function(ev){
 </aside><article class="panel"><div class="roulette" id="roulette">どこへ行こう？</div><div id="result" class="result"><div class="empty"><div class="emoji">🌌</div>抽選ボタンを押して、今夜の行き先を決めよう。</div></div><h2 class="sectionTitle" style="margin-top:25px">候補一覧 <span id="listCount" class="subtle"></span></h2><div id="list" class="searchResults"></div></article></div></section>
 <section id="sky" class="sectionNav"><div class="panel"><div class="datebar"><strong>📅 観測する日</strong><input type="date" id="date" class="control"><button class="smallbtn" id="today">今日に戻す</button></div><div class="astroGrid"><section class="panel" style="box-shadow:none"><h2 class="sectionTitle">🌙 月齢と月明かり</h2><div class="moonCard"><div class="moonIcon" id="moonIcon">🌘</div><div><div id="moonName" style="font-weight:800;font-size:20px"></div><div id="moonAge" class="meta"></div><p id="moonAdvice" class="detail"></p></div></div><div class="alert">月齢と照明率は簡易計算による参考値。月出・月没時刻、正確な月の位置は国立天文台で確認してください。</div></section><section class="panel" style="box-shadow:none"><h2 class="sectionTitle">✨ 今日の見どころ</h2><div id="events"></div></section></div>
 <div class="panel" style="margin-top:15px;box-shadow:none" id="forecastPanel">
-  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px"><div><h2 class="sectionTitle">☁️ 全国の星空観測に適した天気予報 <span style="font-size:11px;color:#a6c9f7">v10.2</span></h2><p class="subtle">選択した日付の19時〜翌3時（日本時間）を、12地方の代表地点で比較します。</p></div><button class="smallbtn" id="weatherRefresh">↻ 予報を更新</button></div>
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px"><div><h2 class="sectionTitle">☁️ 全国の星空観測に適した天気予報 <span style="font-size:11px;color:#a6c9f7">v11.0</span></h2><p class="subtle">選択した日付の19時〜翌3時（日本時間）を、12地方の代表地点で比較します。</p></div><button class="smallbtn" id="weatherRefresh">↻ 予報を更新</button></div>
   <p id="forecastStatus" class="detail" role="status">予報を取得していません。</p>
   <div id="weatherSummary" class="detail"></div><div id="weatherRegions" class="weatherGrid"></div>
   <p class="hint">評価は代表地点の予測雲量・降水確率・風速から計算した参考指数です。各地方の全域を表すものではありません。街明かり、山の雲・霧、月齢、実際の現地天候は別途確認してください。遠い日付は予報が未提供です。</p>
@@ -184,6 +184,39 @@ function mythFigure(x){
  object:'<path d="M172 107L338 107L315 244L195 244Z M156 91L355 91M221 108L221 244M280 108L280 244"/>'
  };
  return `<svg viewBox="0 0 520 320" class="constFigure" role="img" aria-label="${x.name}のモデルとなった姿を表す装飾的な線画"><g ${st} opacity=".95">${p[kind]}</g><text x="15" y="302" font-size="11" fill="#e7bf8b">神話・名前に基づく創作イラスト（星の位置との対応は正確ではありません）</text></svg>`;
+}
+
+// Night Picker v11 original illustrations. Each pack contains exactly 3 optimized WebP images.
+const customConstellationManifest={"オリオン座":"celestial-01-v11.json","さそり座":"celestial-01-v11.json","しし座":"celestial-01-v11.json","てんびん座":"celestial-02-v11.json","おうし座":"celestial-02-v11.json","ふたご座":"celestial-02-v11.json","はくちょう座":"celestial-03-v11.json","カシオペヤ座":"celestial-03-v11.json","ペガスス座":"celestial-03-v11.json","いて座":"celestial-04-v11.json","おとめ座":"celestial-04-v11.json","アンドロメダ座":"celestial-04-v11.json","みずがめ座":"celestial-05-v11.json","うお座":"celestial-05-v11.json","おひつじ座":"celestial-05-v11.json","かに座":"celestial-06-v11.json","やぎ座":"celestial-06-v11.json","ケフェウス座":"celestial-06-v11.json","おおぐま座":"celestial-07-v11.json","こぐま座":"celestial-07-v11.json","ぎょしゃ座":"celestial-07-v11.json","ペルセウス座":"celestial-08-v11.json","うしかい座":"celestial-08-v11.json","こと座":"celestial-08-v11.json","わし座":"celestial-09-v11.json","りゅう座":"celestial-09-v11.json","ヘルクレス座":"celestial-09-v11.json","へびつかい座":"celestial-10-v11.json","いるか座":"celestial-10-v11.json","くじら座":"celestial-10-v11.json"};
+const customConstellationPacks=new Map();
+function customConstellationArtPanel(x){
+ if(!Object.prototype.hasOwnProperty.call(customConstellationManifest,x.name))return historicalArtPanel(x);
+ const area=document.createElement('div');area.className='historicalArt';area.style.cssText='display:none;min-height:120px;padding:12px;border:1px solid #496185;border-radius:16px;background:#0b1120;text-align:center';
+ const status=document.createElement('p');status.textContent='オリジナル星座絵を準備しています…';area.append(status);
+ const image=document.createElement('img');image.alt=x.name+'：Night Pickerオリジナルの星座イラスト（モチーフを半透明で重ねた学習用の概略図）';image.decoding='async';image.loading='lazy';image.style.cssText='display:none;width:100%;height:auto;max-height:650px;object-fit:contain;border-radius:12px;background:#070e1c';area.append(image);
+ const caption=document.createElement('p');caption.style.cssText='color:#b4c6de;line-height:1.7;font-size:12px;margin:10px 4px 2px';caption.textContent='Night Pickerオリジナル星座絵｜星の配置・星名・方位は学習用のイメージであり、実観測用の正確な星図ではありません。';area.append(caption);
+ let started=false;
+ area.load=async()=>{
+  if(started)return;started=true;
+  const file=customConstellationManifest[x.name];
+  try{
+   if(!customConstellationPacks.has(file)){
+    const url='constellation-art/'+encodeURIComponent(file)+'?v=11';
+    const promise=fetch(url,{cache:'force-cache'}).then(r=>{if(!r.ok)throw Error('画像データ '+r.status);return r.json()});
+    customConstellationPacks.set(file,promise);
+   }
+   const data=await customConstellationPacks.get(file);
+   if(!data||typeof data[x.name]!=='string')throw Error('該当する星座絵がありません');
+   image.onload=()=>{status.style.display='none';image.style.display='block'};
+   image.onerror=()=>{status.textContent='画像の表示に失敗しました。もう一度星座を選択してください。';image.style.display='none'};
+   image.src='data:image/webp;base64,'+data[x.name];
+  }catch(e){
+   customConstellationPacks.delete(file);
+   status.textContent='オリジナル星座絵を読み込めませんでした：'+(e.message||String(e));
+   const fallback=historicalArtPanel(x);fallback.style.display='block';area.append(fallback);fallback.load();
+  }
+ };
+ return area;
 }
 
 // Historical constellation art: remotely retrieved from Wikimedia Commons with source & reuse details.
@@ -336,12 +369,12 @@ function drawConstellation(forced){
  pillList.forEach(t=>{const b=document.createElement('span');b.textContent=t;pills.append(b)});
  const toggles=document.createElement('div');toggles.className='constTools';
  const starBtn=document.createElement('button');starBtn.textContent='✦ 星の配置だけ';
- const figBtn=document.createElement('button');figBtn.textContent='🎨 本物の星座絵を見る';
+ const figBtn=document.createElement('button');figBtn.textContent='🎨 本物の星座絵を見る';figBtn.title='オリジナル星座絵を優先し、未収録の星座は歴史的な星座絵を表示';
  toggles.append(starBtn,figBtn);
  const art=document.createElement('div');art.className='constArt';art.innerHTML=constSvg(x);
- const figure=historicalArtPanel(x);
+ const figure=customConstellationArtPanel(x);
  art.append(figure);
- const legend=document.createElement('p');legend.className='constLegend';legend.textContent='星図は模式図です。星座絵はWikimedia Commonsで公開されている歴史的図譜を表示します（インターネット接続が必要）。星図への正確な透過重ね合わせではなく、切り替えて比較する方式です。';
+ const legend=document.createElement('p');legend.className='constLegend';legend.textContent='星図は模式図です。30星座はNight Pickerオリジナル星座絵を表示します。その他の星座はWikimedia Commonsの歴史的星座絵を表示します。星座絵は創作を含み、恒星位置や方角を厳密に表した観測用星図ではありません。';
  function toggle(v){figureVisible=v;art.querySelector('svg').style.display=v?'none':'block';figure.style.display=v?'block':'none';if(v)figure.load();starBtn.classList.toggle('active',!v);figBtn.classList.toggle('active',v)}
  starBtn.onclick=()=>toggle(false);figBtn.onclick=()=>toggle(true);toggle(figureVisible);
  const article=document.createElement('div');article.className='constArticle';
