@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#080c18"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Night Picker"><title>Night Picker v15.0 | 星空・夜景と88星座図鑑</title>
+<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#080c18"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Night Picker"><title>Night Picker v16.0 | 星空・夜景と88星座図鑑</title>
 <style>
 .slideRow{display:flex;align-items:center;gap:12px}.slideRow input{flex:1;min-width:0;accent-color:#a9ccff;cursor:pointer}.slideRow strong{min-width:72px;font-size:13px;color:#c5dcff} .constTools{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:14px 0}.constTools button{padding:9px 12px;border:1px solid #456185;border-radius:10px;background:#142840;color:#e3eeff;cursor:pointer}.constTools button.active{background:#4467ac;color:white}.constTools select,.constTools input{min-width:0;flex:1;padding:9px;background:#111d33;color:white;border:1px solid #3f5472;border-radius:9px}.constHero{position:relative}.constFigure{position:absolute;inset:0;pointer-events:none;opacity:.66;transition:.2s}.constLegend{font-size:11px;color:#acc3e7;margin:5px 0 12px}.constArt{position:relative}.constArt svg{display:block}.constArticle p{line-height:1.95;font-size:14px}.constArticle h4{margin:19px 0 7px;color:#b5d8ff;font-size:16px}.constArticle{max-width:850px}.sourcesNotes a{color:#a6d7ff}
 
@@ -65,6 +65,39 @@ button,a{touch-action:manipulation}
 .eventTimeline .event p{font-size:13px;color:#bbcee8;line-height:1.7;margin:4px 0}
 .eventTimeline a{color:#a9d7ff;font-size:12px}
 .eventTimeline .pastEvent{opacity:.64}
+
+/* v16: iPhone-safe dual-handle time slider with visible selected interval */
+.timeRangeField{padding-bottom:3px}
+.timeRangeValues{display:flex;justify-content:space-between;gap:10px;align-items:center;margin:12px 0 0;color:#c4d7f2;font-size:13px}
+.timeRangeValues strong{color:#fff;font-size:16px;font-variant-numeric:tabular-nums}
+.timeRangeControl{position:relative;height:60px;width:100%;margin:8px 0 0;touch-action:pan-y}
+.timeRangeTrack{position:absolute;top:26px;left:9px;right:9px;height:9px;background:#3b4d69;border-radius:99px;pointer-events:none}
+.timeRangeSelected{height:100%;position:absolute;top:0;background:linear-gradient(90deg,#71baff,#b8ddff);border-radius:99px}
+.timeRangeControl input[type="range"]{
+ position:absolute;left:0;top:8px;width:100%;height:44px;
+ margin:0;padding:0;border:0;background:transparent;
+ -webkit-appearance:none;appearance:none;
+ pointer-events:none;outline:none;
+}
+.timeRangeControl input[type="range"]::-webkit-slider-runnable-track{height:9px;background:transparent;border:0}
+.timeRangeControl input[type="range"]::-moz-range-track{height:9px;background:transparent;border:0}
+.timeRangeControl input[type="range"]::-webkit-slider-thumb{
+ -webkit-appearance:none;appearance:none;pointer-events:auto;
+ width:30px;height:30px;margin-top:-10.5px;border-radius:50%;
+ background:#eaf6ff;border:3px solid #3e85c9;box-shadow:0 2px 9px #0009;
+ cursor:grab;touch-action:none;
+}
+.timeRangeControl input[type="range"]::-moz-range-thumb{
+ pointer-events:auto;width:24px;height:24px;border-radius:50%;
+ background:#eaf6ff;border:3px solid #3e85c9;box-shadow:0 2px 9px #0009;
+ cursor:grab;
+}
+.timeRangeControl .rangeLower{z-index:3}
+.timeRangeControl .rangeUpper{z-index:4}
+.timeRangeControl input[type="range"]:focus-visible::-webkit-slider-thumb{outline:3px solid #ffd28c;outline-offset:2px}
+.timeRangeTicks{display:flex;justify-content:space-between;font-size:11px;color:#a4bbda;padding:0 4px}
+.timeRangeCaption{color:#d7eaff;font-size:14px;font-weight:750;text-align:center;margin:11px 0 9px}
+
 </style>
 <style>
 .weatherGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(218px,1fr));gap:11px;margin:14px 0}
@@ -89,7 +122,7 @@ window.addEventListener('error',function(ev){
  var out=document.getElementById('npErrorText');out.textContent=ev.message||'不明なエラー';
 });
 </script>
-</head><body><main><header><h1>✦ Night Picker <span style="font-size:14px;color:#abc5ea">v15.0</span></h1><p>全国47都道府県の星空・夜景スポットを大幅拡充。移動時間と今夜の空から、行き先を決める。</p><p style="font-size:12px;margin:9px 0 0"><a href="/?v=20261023-150" style="color:#b9d6ff">↻ 最新版を読み込み直す</a>　・　<a href="/version.html?v=20261023-150" style="color:#b9d6ff">公開バージョンを確認</a></p></header>
+</head><body><main><header><h1>✦ Night Picker <span style="font-size:14px;color:#abc5ea">v16.0</span></h1><p>全国47都道府県の星空・夜景スポットを大幅拡充。移動時間と今夜の空から、行き先を決める。</p><p style="font-size:12px;margin:9px 0 0"><a href="/?v=20261023-160" style="color:#b9d6ff">↻ 最新版を読み込み直す</a>　・　<a href="/version.html?v=20261023-160" style="color:#b9d6ff">公開バージョンを確認</a></p></header>
 <div id="npEnvironmentCheck" role="alert"><strong>⚠ HTMLプレビューでは操作できない可能性があります</strong>
 画面は表示されていますが、抽選・星座図鑑・天気予報を動かすJavaScriptが起動していません。<b>ChatGPTのファイルプレビューやiPhoneの「ファイル」アプリで開いている場合</b>、HTML表示だけできて操作が動かないことがあります。Safariで開けるようにWebサイトとして公開するか、JavaScript対応HTMLビューアで開いてください。プルダウンだけ反応するのはこの状態の典型例です。</div>
 <nav><button class="active" data-view="draw">🎲 スポット抽選</button><button data-view="sky">🔭 今日の天体・月齢</button></nav>
@@ -98,12 +131,23 @@ window.addEventListener('error',function(ev){
 <div class="field"><label>目的</label><div class="chips" id="typeChips"><button class="chip active" data-type="すべて">✨ 両方</button><button class="chip" data-type="星空">🌌 星空</button><button class="chip" data-type="夜景">🌃 夜景</button></div></div>
 <div class="field"><label>エリア（大まかな地方別）</label><select id="region" class="control"><option value="">全国すべて</option></select></div>
 <div class="field" id="recordFilterArea"><label>📍 訪問記録から絞り込む</label><div class="recordFilters" id="recordFilters"><button type="button" class="active" data-record="all">すべて</button><button type="button" data-record="favorite">★ お気に入り</button><button type="button" data-record="visited">✓ 行った</button><button type="button" data-record="unvisited">未訪問</button></div><p class="hint" id="recordSummary">このSafari内で記録します。</p></div>
-<div class="field"><label>推定車移動時間の上限</label><div class="slideRow"><input type="range" id="maxTime" min="1" max="12" value="12" step="1" aria-label="最大所要時間"><strong id="maxTimeValue">12時間以内</strong></div><div class="hint">1〜12時間の範囲で候補を絞り込みます。</div></div>
-<button class="primary" id="drawBtn">行き先をランダム抽選 ✦</button><p id="count" class="minor"></p><p class="hint">条件に合う候補から1か所を均等確率で抽選します。候補一覧は推定所要時間が短い順です。</p>
-</aside><article class="panel"><div class="roulette" id="roulette">どこへ行こう？</div><div id="result" class="result"><div class="empty"><div class="emoji">🌌</div>抽選ボタンを押して、今夜の行き先を決めよう。</div></div><h2 class="sectionTitle" style="margin-top:25px">候補一覧 <span id="listCount" class="subtle"></span></h2><div id="list" class="searchResults"></div></article></div></section>
+<div class="field timeRangeField">
+ <label>🚗 推定車移動時間の範囲</label>
+ <div class="timeRangeValues"><span>下限 <strong id="minTimeValue">0時間</strong></span><span>上限 <strong id="maxTimeValue">12時間</strong></span></div>
+ <div class="timeRangeControl" id="timeRangeControl">
+  <div class="timeRangeTrack" aria-hidden="true"><div id="timeRangeSelected" class="timeRangeSelected"></div></div>
+  <input type="range" id="minTime" class="rangeLower" min="0" max="12" value="0" step="0.5" aria-label="移動時間の下限">
+  <input type="range" id="maxTime" class="rangeUpper" min="0" max="12" value="12" step="0.5" aria-label="移動時間の上限">
+ </div>
+ <div class="timeRangeTicks" aria-hidden="true"><span>0時間</span><span>6時間</span><span>12時間</span></div>
+ <p id="timeRangeCaption" class="timeRangeCaption" aria-live="polite">0〜12時間のスポットから抽選</p>
+ <p class="hint">2つのつまみを動かして範囲を指定できます（30分刻み）。最大12時間。時間は道路距離に基づく概算です。</p>
+</div>
+<button class="primary" id="drawBtn">行き先をランダム抽選 ✦</button><p id="count" class="minor"></p><p class="hint">指定した条件に合う候補から、1か所を均等確率で抽選します。</p>
+</aside><article class="panel"><div class="roulette" id="roulette">どこへ行こう？</div><div id="result" class="result"><div class="empty"><div class="emoji">🌌</div>抽選ボタンを押して、今夜の行き先を決めよう。</div></div></article></div></section>
 <section id="sky" class="sectionNav"><div class="panel"><div class="datebar"><strong>📅 観測する日</strong><input type="date" id="date" class="control"><button class="smallbtn" id="today">今日に戻す</button></div><div class="astroGrid"><section class="panel" style="box-shadow:none"><h2 class="sectionTitle">🌙 月齢と月明かり</h2><div class="moonCard"><div class="moonIcon" id="moonIcon">🌘</div><div><div id="moonName" style="font-weight:800;font-size:20px"></div><div id="moonAge" class="meta"></div><p id="moonAdvice" class="detail"></p></div></div><div class="alert">月齢と照明率は簡易計算による参考値。月出・月没時刻、正確な月の位置は国立天文台で確認してください。</div></section><section class="panel" style="box-shadow:none"><h2 class="sectionTitle">✨ 選択日の見どころ</h2><div id="events"></div><h3 class="eventPeriodTitle">📅 今月の天体現象</h3><div id="monthEvents" class="eventTimeline"></div><h3 class="eventPeriodTitle">🔭 今後3か月以内の天体現象</h3><div id="quarterEvents" class="eventTimeline"></div><p class="hint">天体現象は日本時間の概略を表示しています。流星群の極大や観望条件は年ごとに変わります。彗星などの突発現象は専門サイトで最新情報をご確認ください。</p></section></div>
 <div class="panel" style="margin-top:15px;box-shadow:none" id="forecastPanel">
-  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px"><div><h2 class="sectionTitle">☁️ 全国の星空観測に適した天気予報 <span style="font-size:11px;color:#a6c9f7">v15.0</span></h2><p class="subtle">選択した日付の19時〜翌3時（日本時間）を、12地方の代表地点で比較します。</p></div><button class="smallbtn" id="weatherRefresh">↻ 予報を更新</button></div>
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px"><div><h2 class="sectionTitle">☁️ 全国の星空観測に適した天気予報 <span style="font-size:11px;color:#a6c9f7">v16.0</span></h2><p class="subtle">選択した日付の19時〜翌3時（日本時間）を、12地方の代表地点で比較します。</p></div><button class="smallbtn" id="weatherRefresh">↻ 予報を更新</button></div>
   <p id="forecastStatus" class="detail" role="status">予報を取得していません。</p>
   <div id="weatherSummary" class="detail"></div><div id="weatherRegions" class="weatherGrid"></div>
   <p class="hint">評価は代表地点の予測雲量・降水確率・風速から計算した参考指数です。各地方の全域を表すものではありません。街明かり、山の雲・霧、月齢、実際の現地天候は別途確認してください。遠い日付は予報が未提供です。</p>
@@ -207,16 +251,51 @@ $$('nav button').forEach(b=>b.onclick=()=>{$$('nav button').forEach(x=>x.classLi
 $$('#typeChips .chip').forEach(b=>b.onclick=()=>{type=b.dataset.type;$$('#typeChips .chip').forEach(x=>x.classList.toggle('active',x===b));renderList()});
 $('#origin').onchange=()=>{let v=$('#origin').value;if(v==='loc'){if(!navigator.geolocation){$('#originHint').textContent='現在地の取得に非対応です。';return}$('#originHint').textContent='現在地を取得中…（ブラウザの許可が必要）';navigator.geolocation.getCurrentPosition(p=>{origin=[p.coords.latitude,p.coords.longitude,'現在地'];$('#originHint').textContent='現在地基準で概算しました。正確なルートではありません。';renderList()},e=>{$('#originHint').textContent='取得できませんでした。HTTPSでの利用が必要な場合があります。';$('#origin').value='toy';origin=[...originPoints.toy];renderList()},{timeout:9000})}else{origin=[...originPoints[v]];$('#originHint').textContent='道路距離を推定した概算時間です。渋滞・高速利用条件は未反映。';renderList()}};
 $('#region').onchange=renderList;
-document.querySelectorAll('#recordFilters button').forEach(b=>b.onclick=()=>{recordView=b.dataset.record;document.querySelectorAll('#recordFilters button').forEach(x=>x.classList.toggle('active',x===b));renderList()});let sliderTimer;$('#maxTime').oninput=()=>{let v=+$('#maxTime').value;$('#maxTimeValue').textContent=v+'時間以内';clearTimeout(sliderTimer);sliderTimer=setTimeout(renderList,130)};$('#maxTime').onchange=()=>{clearTimeout(sliderTimer);renderList()};
+document.querySelectorAll('#recordFilters button').forEach(b=>b.onclick=()=>{recordView=b.dataset.record;document.querySelectorAll('#recordFilters button').forEach(x=>x.classList.toggle('active',x===b));renderList()});
+let sliderTimer;
+const minTimeSlider=$('#minTime'),maxTimeSlider=$('#maxTime');
+function formatTimeRangeHours(value){
+ return Number.isInteger(value)?value+'時間':Math.floor(value)+'時間30分';
+}
+function updateTimeRangeUI(){
+ const min=Number(minTimeSlider.value),max=Number(maxTimeSlider.value);
+ $('#minTimeValue').textContent=formatTimeRangeHours(min);
+ $('#maxTimeValue').textContent=formatTimeRangeHours(max);
+ $('#timeRangeCaption').textContent=formatTimeRangeHours(min)+'〜'+formatTimeRangeHours(max)+'のスポットから抽選';
+ const track=$('#timeRangeSelected');
+ track.style.left=(min/12*100)+'%';
+ track.style.width=((max-min)/12*100)+'%';
+ minTimeSlider.setAttribute('aria-valuetext',formatTimeRangeHours(min)+'以上');
+ maxTimeSlider.setAttribute('aria-valuetext',formatTimeRangeHours(max)+'以下');
+}
+function timeRangeMoved(which){
+ let lo=Number(minTimeSlider.value),hi=Number(maxTimeSlider.value);
+ // Maintain a minimum 30-minute interval for two independently accessible handles.
+ if(which==='min'&&lo>hi-.5){lo=Math.max(0,hi-.5);minTimeSlider.value=String(lo)}
+ if(which==='max'&&hi<lo+.5){hi=Math.min(12,lo+.5);maxTimeSlider.value=String(hi)}
+ updateTimeRangeUI();
+ clearTimeout(sliderTimer);
+ sliderTimer=setTimeout(renderList,95);
+}
+minTimeSlider.addEventListener('input',()=>timeRangeMoved('min'));
+maxTimeSlider.addEventListener('input',()=>timeRangeMoved('max'));
+minTimeSlider.addEventListener('change',()=>{clearTimeout(sliderTimer);renderList()});
+maxTimeSlider.addEventListener('change',()=>{clearTimeout(sliderTimer);renderList()});
+updateTimeRangeUI();
+
 function km(a,b,c,d){const r=6371,x=(c-a)*Math.PI/180,y=(d-b)*Math.PI/180;const z=Math.sin(x/2)**2+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(y/2)**2;return 2*r*Math.atan2(Math.sqrt(z),Math.sqrt(1-z))}
 let travelCache=new WeakMap(),cachedOriginKey='';
 function hours(s){let key=origin[0]+','+origin[1];if(key!==cachedOriginKey){travelCache=new WeakMap();cachedOriginKey=key}let v=travelCache.get(s);if(v!==undefined)return v;const d=km(origin[0],origin[1],s.lat,s.lon);v=.25+d*1.30/65+(d<40?d/90:0);travelCache.set(s,v);return v}
 function fmt(h){if(h<1)return '約'+Math.max(10,Math.round(h*60/10)*10)+'分';const n=Math.round(h*2)/2;return '約'+(Number.isInteger(n)?n:n.toFixed(1))+'時間'}
-function pool(){const m=+$('#maxTime').value,region=$('#region').value;return spots.filter(s=>(!region||regions[region].includes(s.pref))&&(type==='すべて'||type===s.type)&&(hours(s)<=m)&&(recordView==='all'||(recordView==='favorite'&&spotRecord(s).favorite)||(recordView==='visited'&&spotRecord(s).visited)||(recordView==='unvisited'&&!spotRecord(s).visited))).sort((a,b)=>hours(a)-hours(b))}
-let displayedLimit=35, lastListPool=[];
-function appendListChunk(){const list=$('#list');const batch=lastListPool.slice(list.querySelectorAll('.item').length,displayedLimit);const frag=document.createDocumentFragment();for(const s of batch){const d=document.createElement('div');d.className='item';const label=document.createElement('span');label.textContent=`${s.pref}｜${s.name}（${s.type}） — ${fmt(hours(s))}`;const b=document.createElement('button');b.textContent='詳細';b.onclick=()=>show(s);const fav=document.createElement('button');fav.className='recordMini';fav.type='button';fav.title='お気に入りを切り替える';fav.textContent=spotRecord(s).favorite?'★':'☆';fav.setAttribute('aria-pressed',String(!!spotRecord(s).favorite));fav.onclick=()=>updateSpotRecord(s,'favorite',!spotRecord(s).favorite);d.append(label,fav,b);frag.append(d)}list.append(frag);let more=$('#moreDestinations');if(!more){more=document.createElement('button');more.id='moreDestinations';more.className='smallbtn';more.style.cssText='margin:10px 0;width:100%';more.onclick=()=>{displayedLimit+=35;appendListChunk()};list.after(more)}const remaining=lastListPool.length-list.querySelectorAll('.item').length;more.hidden=remaining<=0;more.textContent=`残り${remaining}か所を表示（次の35件）`}
-function renderList(){const a=pool();lastListPool=a;displayedLimit=35;$('#count').textContent=`対象：${a.length}か所 / 全${spots.length}か所（追加地点の時間は県代表点の参考値）`;const tally=recordTally();$('#recordSummary').textContent=`記録：★ お気に入り ${tally.favorite}件 ／ ✓ 行った ${tally.visited}件（この端末内に保存）`;$('#listCount').textContent=a.length+'か所';$('#drawBtn').disabled=!a.length;$('#list').replaceChildren();if(!a.length){$('#list').textContent='該当するスポットがありません。条件を緩めてください。';const more=$('#moreDestinations');if(more)more.hidden=true;return}appendListChunk()}
-
+function pool(){const lo=Number($('#minTime').value),hi=Number($('#maxTime').value),region=$('#region').value;return spots.filter(s=>(!region||regions[region].includes(s.pref))&&(type==='すべて'||type===s.type)&&(hours(s)>=lo)&&(hours(s)<=hi)&&(recordView==='all'||(recordView==='favorite'&&spotRecord(s).favorite)||(recordView==='visited'&&spotRecord(s).visited)||(recordView==='unvisited'&&!spotRecord(s).visited)))}
+function renderList(){
+ const candidates=pool();
+ $('#count').textContent='抽選対象：'+candidates.length+'か所 / 全'+spots.length+'か所（移動時間は概算）';
+ const tally=recordTally();
+ $('#recordSummary').textContent='記録：★ お気に入り '+tally.favorite+'件 ／ ✓ 行った '+tally.visited+'件（この端末内に保存）';
+ $('#drawBtn').disabled=!candidates.length;
+ if(!candidates.length)$('#count').textContent+='　※条件に合うスポットがありません。時間や地域の範囲を広げてください。';
+}
 
 // Photo lookup loads only for the selected destination; attribution stays beside the image.
 function googlePlaceLink(s){
