@@ -122,10 +122,13 @@ window.addEventListener('error',function(ev){
  var out=document.getElementById('npErrorText');out.textContent=ev.message||'不明なエラー';
 });
 </script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin="" defer></script>
+<style>.npMapControls{display:flex;gap:12px;flex-wrap:wrap;align-items:end;margin:16px 0}.npMapControls label{font-size:13px;display:grid;gap:5px}.npMapControls .control{min-width:165px}#npMapCanvas{height:460px;width:100%;border-radius:14px;background:#15223a;border:1px solid #344964}.npMapList{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:9px;margin-top:14px}.npMapItem{padding:12px;border:1px solid #3a506a;border-radius:11px;background:#16263d}.npMapItem strong{display:block;margin-bottom:5px}.npMapItem p{font-size:12px;margin:4px 0;color:#b6cbe8}.npMapItem button{margin-top:7px}.npPin{border:2px solid white;border-radius:50%;box-shadow:0 0 0 2px #24354b;background:#77b9ff;width:14px;height:14px}.npPin.star{background:#e5ba69}.npPin.city{background:#ba9df5}.npMapTip{color:#b0c5e2}@media(max-width:600px){#npMapCanvas{height:350px}}</style>
 </head><body><main><header><h1>✦ NOCTRAIL <span style="font-size:14px;color:#abc5ea">v19.0</span></h1><p>全国47都道府県の星空・夜景スポットを大幅拡充。移動時間と今夜の空から、行き先を決める。</p><p style="font-size:12px;margin:9px 0 0"><a href="/?v=20261023-180" style="color:#b9d6ff">↻ 最新版を読み込み直す</a>　・　<a href="/version.html?v=20261023-180" style="color:#b9d6ff">公開バージョンを確認</a></p></header>
 <div id="npEnvironmentCheck" role="alert"><strong>⚠ HTMLプレビューでは操作できない可能性があります</strong>
 画面は表示されていますが、抽選・星座図鑑・天気予報を動かすJavaScriptが起動していません。<b>ChatGPTのファイルプレビューやiPhoneの「ファイル」アプリで開いている場合</b>、HTML表示だけできて操作が動かないことがあります。Safariで開けるようにWebサイトとして公開するか、JavaScript対応HTMLビューアで開いてください。プルダウンだけ反応するのはこの状態の典型例です。</div>
-<nav><button class="active" data-view="draw">🎲 スポット抽選</button><button data-view="sky">🔭 今日の天体・月齢</button></nav>
+<nav><button class="active" data-view="draw">🎲 スポット抽選</button><button data-view="sky">🔭 今日の天体・月齢</button><button data-view="myMap">🗺️ マイ観測・夜景マップ</button></nav>
 <section id="draw" class="sectionNav active"><div class="layout"><aside class="panel">
 <div class="field"><label>出発地点（所要時間の基準）</label><select id="origin" class="control"><option value="toy">豊洲駅（東京）</option><option value="tok">東京駅</option><option value="shi">新宿駅</option><option value="osa">大阪駅</option><option value="nag">名古屋駅</option><option value="hak">博多駅</option><option value="sap">札幌駅</option><option value="loc">現在地を取得</option></select><div id="originHint" class="minor">道路距離を推定した概算時間です。渋滞・高速利用条件は未反映。</div></div>
 <div class="field"><label>目的</label><div class="chips" id="typeChips"><button class="chip active" data-type="すべて">✨ 両方</button><button class="chip" data-type="星空">🌌 星空</button><button class="chip" data-type="夜景">🌃 夜景</button></div></div>
@@ -145,6 +148,9 @@ window.addEventListener('error',function(ev){
 </div>
 <button class="primary" id="drawBtn">行き先をランダム抽選 ✦</button><p id="count" class="minor"></p><p class="hint">指定した条件に合う候補から、1か所を均等確率で抽選します。</p>
 </aside><article class="panel"><div class="roulette" id="roulette">どこへ行こう？</div><div id="result" class="result"><div class="empty"><div class="emoji">🌌</div>抽選ボタンを押して、今夜の行き先を決めよう。</div></div></article></div></section>
+<section id="myMap" class="sectionNav"><div class="panel"><h2 class="sectionTitle">🗺️ マイ観測・夜景マップ</h2><p class="detail">「行った」「お気に入り」「観測写真あり」のスポットを地図で確認。記録は現在のブラウザに保存されます。</p>
+<div class="npMapControls"><label>表示対象 <select id="npMapFilter" class="control"><option value="all">記録したすべて</option><option value="visited">✓ 行った</option><option value="favorite">★ お気に入り</option><option value="photos">📷 写真あり</option></select></label><label>地方 <select id="npMapRegion" class="control"><option value="">全国</option></select></label><button class="smallbtn" id="npMapRefresh">↻ 表示を更新</button></div>
+<div id="npMapSummary" class="detail" role="status"></div><div id="npMapCanvas" aria-label="訪問・お気に入り・写真の記録地図"></div><p class="hint">地図はOpenStreetMapの地図タイルを利用。スポットの座標には都道府県の代表点などの概算値が含まれます。正確な経路・駐車場の位置は目的地の案内で確認してください。</p><div id="npMapList" class="npMapList"></div></div></section>
 <section id="sky" class="sectionNav"><div class="panel"><div class="datebar"><strong>📅 観測する日</strong><input type="date" id="date" class="control"><button class="smallbtn" id="today">今日に戻す</button></div><div class="astroGrid"><section class="panel" style="box-shadow:none"><h2 class="sectionTitle">🌙 月齢と月明かり</h2><div class="moonCard"><div class="moonIcon" id="moonIcon">🌘</div><div><div id="moonName" style="font-weight:800;font-size:20px"></div><div id="moonAge" class="meta"></div><p id="moonAdvice" class="detail"></p></div></div><section class="npSection"><h3>🌑 月齢・天の川観測カレンダー</h3><div id="npMoonCalendar"></div><p class="hint">月の輝面率による簡易評価。月出・月没は考慮していません。</p></section><div class="alert">月齢と照明率は簡易計算による参考値。月出・月没時刻、正確な月の位置は国立天文台で確認してください。</div></section><section class="panel" style="box-shadow:none"><h2 class="sectionTitle">✨ 選択日の見どころ</h2><div id="events"></div><section class="npSection"><h3>🔭 選択日に見える星座・天体の目安</h3><div id="npTargets"></div></section><h3 class="eventPeriodTitle">📅 今月の天体現象</h3><div id="monthEvents" class="eventTimeline"></div><h3 class="eventPeriodTitle">🔭 今後3か月以内の天体現象</h3><div id="quarterEvents" class="eventTimeline"></div><p class="hint">天体現象は日本時間の概略を表示しています。流星群の極大や観望条件は年ごとに変わります。彗星などの突発現象は専門サイトで最新情報をご確認ください。</p></section></div>
 <div class="panel" style="margin-top:15px;box-shadow:none" id="forecastPanel">
   <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px"><div><h2 class="sectionTitle">☁️ 全国の星空観測に適した天気予報 <span style="font-size:11px;color:#a6c9f7">v18.0</span></h2><p class="subtle">選択した日付の19時〜翌3時（日本時間）を、12地方の代表地点で比較します。</p></div><button class="smallbtn" id="weatherRefresh">↻ 予報を更新</button></div>
@@ -974,4 +980,39 @@ document.documentElement.classList.add('np-ready');
 <script>(function(){const input=document.getElementById('date'),cal=document.getElementById('npMoonCalendar'),targets=document.getElementById('npTargets');cal.className='npCalendar';
  function render(){if(!input.value)return;const [y,m,d]=input.value.split('-').map(Number),days=new Date(y,m,0).getDate(),first=new Date(y,m-1,1).getDay();cal.replaceChildren();for(const h of ['日','月','火','水','木','金','土']){const x=document.createElement('small');x.textContent=h;cal.append(x)}for(let i=0;i<first;i++)cal.append(document.createElement('span'));for(let day=1;day<=days;day++){const iso=y+'-'+String(m).padStart(2,'0')+'-'+String(day).padStart(2,'0'),moon=lunar(iso),light=Math.round(moon.illum*100),age=moon.age,phase=age<1.85||age>=27.68?'🌑':age<5.54?'🌒':age<9.23?'🌓':age<12.92?'🌔':age<16.61?'🌕':age<20.30?'🌖':age<23.99?'🌗':'🌘',b=document.createElement('button');b.type='button';b.className=(light<25?'best ':'')+(d===day?'picked':'');b.innerHTML=day+'日<small>'+phase+' '+light+'%</small>';b.onclick=()=>{input.value=iso;input.dispatchEvent(new Event('change',{bubbles:true}))};cal.append(b)}
  const season=m>=11||m<=2?'冬':m<=5?'春':m<=8?'夏':'秋',data={冬:['オリオン座・M42','おうし座・すばる M45','ふたご座'],春:['しし座','おとめ座・スピカ','うしかい座・アークトゥルス'],夏:['こと座・ベガ','はくちょう座・天の川','いて座・M8・M22'],秋:['ペガスス座','カシオペヤ座','アンドロメダ座・M31']};targets.replaceChildren();const p=document.createElement('p');p.textContent=season+'の夜20〜23時ごろに探しやすい代表的な星座・天体（日本の中緯度の目安）';targets.append(p);const ul=document.createElement('ul');for(const t of data[season]){const li=document.createElement('li');li.textContent=t;ul.append(li)}targets.append(ul);const note=document.createElement('p');note.className='hint';note.textContent='方位・高度・惑星の位置は日時・場所で変化します。正確な星図ではありません。';targets.append(note);const link=document.createElement('a');link.href='https://www.nao.ac.jp/astro/sky/';link.target='_blank';link.rel='noopener noreferrer';link.textContent='国立天文台で惑星・当日の星空を確認 ↗';targets.append(link)}
- input.addEventListener('change',render);document.getElementById('today').addEventListener('click',()=>setTimeout(render,0));render()})();</script></body></html>
+ input.addEventListener('change',render);document.getElementById('today').addEventListener('click',()=>setTimeout(render,0));render()})();</script><script>
+(function(){
+ const root=document.getElementById('myMap'),filter=document.getElementById('npMapFilter'),region=document.getElementById('npMapRegion'),summary=document.getElementById('npMapSummary'),list=document.getElementById('npMapList');
+ let map=null,markers=null;
+ for(const name of Object.keys(regions)){const option=document.createElement('option');option.value=option.textContent=name;region.append(option)}
+ function records(){return spots.filter(s=>{const r=spotRecord(s);return !!(r.visited||r.favorite||(r.photos&&r.photos.length))}).filter(s=>{const r=spotRecord(s);return filter.value==='all'||filter.value==='visited'&&r.visited||filter.value==='favorite'&&r.favorite||filter.value==='photos'&&r.photos?.length}).filter(s=>!region.value||regions[region.value].includes(s.pref))}
+ function showSpot(s){document.querySelector('nav button[data-view="draw"]').click();show(s);document.getElementById('result').scrollIntoView({behavior:'smooth',block:'start'})}
+ function redraw(){
+ const all=spots.filter(s=>{const r=spotRecord(s);return r.visited||r.favorite||r.photos?.length});
+ const active=records();
+ summary.textContent='登録スポット '+all.length+'件 ／ 表示中 '+active.length+'件 ／ 訪問済み '+all.filter(s=>spotRecord(s).visited).length+'件 ／ 写真あり '+all.filter(s=>spotRecord(s).photos?.length).length+'件';
+ list.replaceChildren();
+ for(const s of active){
+  const r=spotRecord(s),item=document.createElement('div');item.className='npMapItem';const h=document.createElement('strong');h.textContent=s.name;
+  const meta=document.createElement('p');meta.textContent=s.pref+'・'+s.type+' ／ '+[r.visited?'✓ 訪問':'',r.favorite?'★ お気に入り':'',r.photos?.length?'📷 '+r.photos.length+'枚':''].filter(Boolean).join(' ・ ');
+  const btn=document.createElement('button');btn.type='button';btn.className='smallbtn';btn.textContent='スポット詳細を見る';btn.onclick=()=>showSpot(s);item.append(h,meta,btn);list.append(item);
+ }
+ if(!window.L){summary.textContent+='　地図を読み込めないため、下の記録一覧を表示しています。';return}
+ if(!map){map=L.map('npMapCanvas',{scrollWheelZoom:false}).setView([36,139],6);
+ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; OpenStreetMap contributors',maxZoom:17}).addTo(map);
+ markers=L.layerGroup().addTo(map)}
+ markers.clearLayers();const bounds=[];
+ for(const s of active){
+  if(!Number.isFinite(s.lat)||!Number.isFinite(s.lon))continue;
+  const icon=L.divIcon({className:'',html:'<div class="npPin '+(s.type==='夜景'?'city':'star')+'"></div>',iconSize:[18,18],iconAnchor:[9,9]});
+  const marker=L.marker([s.lat,s.lon],{icon}).addTo(markers);
+  const label=document.createElement('div');const title=document.createElement('strong');title.textContent=s.name;const line=document.createElement('p');line.textContent=s.pref+(s.approx?'（概算位置）':'');const b=document.createElement('button');b.textContent='詳細を見る';b.onclick=()=>showSpot(s);label.append(title,line,b);
+  marker.bindPopup(label);bounds.push([s.lat,s.lon]);
+ }
+ if(bounds.length)map.fitBounds(bounds,{padding:[30,30],maxZoom:11});else map.setView([36,139],6);
+ setTimeout(()=>map.invalidateSize(),80);
+ }
+ document.querySelector('nav button[data-view="myMap"]').addEventListener('click',()=>setTimeout(redraw,100));
+ filter.addEventListener('change',redraw);region.addEventListener('change',redraw);document.getElementById('npMapRefresh').addEventListener('click',redraw);
+})();
+</script></body></html>
