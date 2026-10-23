@@ -391,6 +391,16 @@ function spotPhotoPreview(s){
  })();
  return root;
 }
+// Verified access restrictions (sources checked 2026-10-23). Unlisted places remain unverified.
+const verifiedAccess={
+ '茨城｜朝日峠展望公園':{status:'restricted',hours:'駐車場ゲート 9:00〜16:00。深夜ドライブでの利用は推奨しません。',parking:'朝日峠無料駐車場（ゲート閉鎖による閉じ込め注意）',toilet:'駐車場脇にトイレがあるが、使用不可の場合が多い',source:'https://www.wbsj-ibaraki.jp/watching-spot/asahitouge/',parkingQuery:'朝日峠無料駐車場'},
+ '埼玉｜美の山公園 展望台':{status:'open',hours:'公園・駐車場は常時開放（夜間照明なし）',parking:'第1〜第3駐車場（無料・常時開放）',lighting:'夜間照明なし。ライト・防寒具を準備',source:'https://www.pref.saitama.lg.jp/b0504/minoyamakouen-top/riyou.html',parkingQuery:'美の山公園 第1駐車場'},
+ '栃木｜太平山神社周辺':{status:'restricted',hours:'太平山遊覧道路に夜間車両通行止めあり。栃木県の案内は22:00〜翌4:00。最新標識を優先。',parking:'神社周辺に無料駐車場あり。通行止め時間帯は車で向かわないこと',source:'https://www.agrinet.pref.tochigi.lg.jp/tochigi-nouson-meguri/archives/spot_winter/ohira_night_view',parkingQuery:'太平山 謙信平駐車場'},
+ '群馬｜群馬県庁 展望ホール':{status:'hours',hours:'平日 8:30〜22:00、土日祝 9:00〜22:00（入館21:45まで）',parking:'県庁県民駐車場。夜間の駐車料金・出庫条件を別途確認',source:'https://www.pref.gunma.jp/page/1023.html',parkingQuery:'群馬県庁 県民駐車場'},
+ '栃木｜戦場ヶ原 三本松駐車場周辺':{status:'unknown',hours:'奥日光の県営駐車場は原則24時間入出庫可能。ただし三本松駐車場自体の適用・閉鎖情報は個別確認',parking:'三本松駐車場の案内と現地標識を確認',source:'https://www.pref.tochigi.lg.jp/d04/parkinglot.html',parkingQuery:'奥日光 三本松駐車場'}
+};
+function verifiedAccessFor(s){return verifiedAccess[spotRecordKey(s)]||null}
+function parkingDestinationLink(s){const v=verifiedAccessFor(s);return 'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(v?.parkingQuery||s.pref+' '+s.name+' 駐車場')}
 function show(s){
  selected=s;const h=hours(s);$('#result').replaceChildren();
  const hero=document.createElement('div');
@@ -414,6 +424,13 @@ function show(s){
  hero.querySelector('.media').append(spotPhotoPreview(s));hero.querySelector('.spotIntro').after(buildSpotRecordPanel(s));
  const access=document.createElement('section');access.className='npSection';const heading=document.createElement('h3');heading.textContent='🚗 アクセス・駐車場・現地設備';access.append(heading);
  for(const [name,value] of [['車でのアクセス',s.approx?'地点は概算。正確な目的地を再確認してください':'Googleマップで実際の経路と通行規制を確認'],['駐車場','未確認：場所、夜間開放、料金を確認'],['夜間利用可否','未確認：閉園時間・立入制限を確認'],['トイレ','未確認：有無と夜間の利用を確認'],['街灯','未確認：現地の明るさと安全性を確認']]){const row=document.createElement('div');row.className='npAccessRow';const a=document.createElement('strong'),b=document.createElement('span');a.textContent=name;b.textContent=value;row.append(a,b);access.append(row)}
+ const v=verifiedAccessFor(s);
+ if(v){
+ const flag=document.createElement('p');flag.className='hint';flag.style.fontWeight='bold';flag.textContent=v.status==='open'?'✅ 常時開放の記載あり（現地状況は要確認）':v.status==='restricted'?'⛔ 夜間の車両利用に制限あり':v.status==='hours'?'🕘 営業時間あり・深夜利用不可':'ℹ️ 対象施設の夜間利用は未確認';access.insertBefore(flag,access.children[1]);
+ const rr=[...access.querySelectorAll('.npAccessRow')];if(rr[2])rr[2].lastChild.textContent=v.hours||rr[2].lastChild.textContent;if(rr[1])rr[1].lastChild.textContent=v.parking||rr[1].lastChild.textContent;if(v.toilet&&rr[3])rr[3].lastChild.textContent=v.toilet;if(v.lighting&&rr[4])rr[4].lastChild.textContent=v.lighting;
+ const source=document.createElement('a');source.href=v.source;source.target='_blank';source.rel='noopener noreferrer';source.textContent='確認済み情報の出典 ↗';access.append(source,document.createTextNode('　'));
+ }
+ const park=document.createElement('a');park.href=parkingDestinationLink(s);park.target='_blank';park.rel='noopener noreferrer';park.textContent='駐車場をGoogleマップで探す ↗';access.append(park,document.createTextNode('　'));
  const search=document.createElement('a');search.href='https://www.google.com/search?q='+encodeURIComponent(s.pref+' '+s.name+' 駐車場 夜間 トイレ 公式');search.target='_blank';search.rel='noopener noreferrer';search.textContent='現地施設の公式案内を検索 ↗';access.append(search);hero.querySelector('.spotIntro').after(access);
 }
 let drawing=false;
