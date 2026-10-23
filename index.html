@@ -125,7 +125,7 @@ window.addEventListener('error',function(ev){
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin="" defer></script>
 <style>.npMapControls{display:flex;gap:12px;flex-wrap:wrap;align-items:end;margin:16px 0}.npMapControls label{font-size:13px;display:grid;gap:5px}.npMapControls .control{min-width:165px}#npMapCanvas{height:460px;width:100%;border-radius:14px;background:#15223a;border:1px solid #344964}.npMapList{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:9px;margin-top:14px}.npMapItem{padding:12px;border:1px solid #3a506a;border-radius:11px;background:#16263d}.npMapItem strong{display:block;margin-bottom:5px}.npMapItem p{font-size:12px;margin:4px 0;color:#b6cbe8}.npMapItem button{margin-top:7px}.npPin{border:2px solid white;border-radius:50%;box-shadow:0 0 0 2px #24354b;background:#77b9ff;width:14px;height:14px}.npPin.star{background:#e5ba69}.npPin.city{background:#ba9df5}.npMapTip{color:#b0c5e2}.npMapEmoji{display:inline-flex;align-items:center;justify-content:center;border:1px solid #9ab7da;border-radius:12px;padding:4px 6px;background:#12243c;white-space:nowrap;font-size:18px;box-shadow:0 2px 10px #0008}@media(max-width:600px){#npMapCanvas{height:350px}}</style>
-</head><body><main><header><h1>✦ NOCTRAIL <span style="font-size:14px;color:#abc5ea">v19.0</span></h1><p>全国47都道府県の星空・夜景スポットを大幅拡充。移動時間と今夜の空から、行き先を決める。</p><p style="font-size:12px;margin:9px 0 0"><a href="/?v=20261023-180" style="color:#b9d6ff">↻ 最新版を読み込み直す</a>　・　<a href="/version.html?v=20261023-180" style="color:#b9d6ff">公開バージョンを確認</a></p></header>
+</head><body><main><header><h1>✦ NOCTRAIL <span id="npLiveVersion" style="font-size:14px;color:#abc5ea">バージョン確認中</span></h1><p>全国47都道府県の星空・夜景スポットを大幅拡充。移動時間と今夜の空から、行き先を決める。</p><p style="font-size:12px;margin:9px 0 0"><a id="npReloadLatest" href="./" style="color:#b9d6ff">↻ 最新版を読み込み直す</a>　・　<a href="./version.html" style="color:#b9d6ff">公開バージョンを確認</a></p></header>
 <div id="npEnvironmentCheck" role="alert"><strong>⚠ HTMLプレビューでは操作できない可能性があります</strong>
 画面は表示されていますが、抽選・星座図鑑・天気予報を動かすJavaScriptが起動していません。<b>ChatGPTのファイルプレビューやiPhoneの「ファイル」アプリで開いている場合</b>、HTML表示だけできて操作が動かないことがあります。Safariで開けるようにWebサイトとして公開するか、JavaScript対応HTMLビューアで開いてください。プルダウンだけ反応するのはこの状態の典型例です。</div>
 <nav><button class="active" data-view="draw">🎲 スポット抽選</button><button data-view="sky">🔭 今日の天体・月齢</button><button data-view="myMap">🗺️ マイ観測・夜景マップ</button><button data-view="community">💬 みんなの投稿</button></nav>
@@ -1026,4 +1026,21 @@ document.documentElement.classList.add('np-ready');
  document.querySelector('nav button[data-view="myMap"]').addEventListener('click',()=>setTimeout(redraw,100));
  filter.addEventListener('change',redraw);region.addEventListener('change',redraw);category.addEventListener('change',redraw);sort.addEventListener('change',redraw);searchText.addEventListener('input',redraw);document.getElementById('npMapRefresh').addEventListener('click',redraw);
 })();
-</script><script>(function(){const input=document.getElementById('communitySpotSearch'),results=document.getElementById('communitySpotResults');if(!input||!results)return;function render(){results.replaceChildren();const q=input.value.trim().toLocaleLowerCase('ja');if(!q){const p=document.createElement('p');p.className='hint';p.textContent='名称を入力すると登録済みスポットを検索できます。';results.append(p);return}const matches=spots.filter(s=>(s.pref+' '+s.name).toLocaleLowerCase('ja').includes(q)).slice(0,30);for(const s of matches){const card=document.createElement('div');card.className='npMapItem';const name=document.createElement('strong');name.textContent=s.name;const details=document.createElement('p');details.textContent=s.pref+' ／ '+(spotRecord(s).category||s.type);const notice=document.createElement('small');notice.textContent='公開投稿機能は準備中';card.append(name,details,notice);results.append(card)}if(!matches.length)results.textContent='一致するスポットはありません。'}input.addEventListener('input',render);render()})();</script></body></html>
+</script><script>(function(){const input=document.getElementById('communitySpotSearch'),results=document.getElementById('communitySpotResults');if(!input||!results)return;function render(){results.replaceChildren();const q=input.value.trim().toLocaleLowerCase('ja');if(!q){const p=document.createElement('p');p.className='hint';p.textContent='名称を入力すると登録済みスポットを検索できます。';results.append(p);return}const matches=spots.filter(s=>(s.pref+' '+s.name).toLocaleLowerCase('ja').includes(q)).slice(0,30);for(const s of matches){const card=document.createElement('div');card.className='npMapItem';const name=document.createElement('strong');name.textContent=s.name;const details=document.createElement('p');details.textContent=s.pref+' ／ '+(spotRecord(s).category||s.type);const notice=document.createElement('small');notice.textContent='公開投稿機能は準備中';card.append(name,details,notice);results.append(card)}if(!matches.length)results.textContent='一致するスポットはありません。'}input.addEventListener('input',render);render()})();</script><script>
+/* Show the most recent published commit as an automatically changing version ID. */
+(function(){
+ const el=document.getElementById('npLiveVersion'),reload=document.getElementById('npReloadLatest');
+ const fallback='v20.0';
+ if(!el)return;
+ el.textContent=fallback;
+ const api='https://api.github.com/repos/tontonmomo0712-a11y/Night-picker/commits/main';
+ fetch(api,{cache:'no-store',headers:{Accept:'application/vnd.github+json'}}).then(r=>{if(!r.ok)throw Error('version unavailable');return r.json()}).then(d=>{
+  const sha=String(d.sha||'').slice(0,7),iso=d.commit?.committer?.date||d.commit?.author?.date;
+  if(!sha||!iso)return;
+  const stamp=new Intl.DateTimeFormat('ja-JP',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(iso)).replaceAll('/','.');
+  el.textContent='v'+stamp+'.'+sha;
+  el.title='GitHub最終更新コミット: '+d.sha;
+ }).catch(()=>{el.textContent=fallback;el.title='バージョン確認に失敗しました'});
+ if(reload)reload.addEventListener('click',e=>{e.preventDefault();const url=new URL(window.location.href);url.searchParams.set('refresh',Date.now().toString());window.location.assign(url.toString())});
+})();
+</script></body></html>
