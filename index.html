@@ -60,6 +60,18 @@ button,a{touch-action:manipulation}
 .visitDateRow input,.spotMemoLabel textarea{color:#e5f0ff;background:#0c1629;border:1px solid #3a5379;border-radius:10px;padding:10px;font:inherit;max-width:100%}
 .spotMemoLabel textarea{width:100%;resize:vertical;line-height:1.6}
 .eventPeriodTitle{color:#d4e6ff;font-size:16px;padding:12px 0 7px;margin:14px 0 4px;border-top:1px solid #364969}
+.astroEventFold{margin:12px 0;border:1px solid #3a5275;border-radius:12px;overflow:hidden;background:#14243b}
+.astroEventFold summary{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:14px 13px;cursor:pointer;list-style:none;color:#e1edff;font-weight:700;font-size:14px;line-height:1.5}
+.astroEventFold summary::-webkit-details-marker{display:none}
+.astroEventFold summary:hover{background:#1b3150}
+.astroEventFold summary:focus-visible{outline:2px solid #8abfff;outline-offset:-3px}
+.astroEventFoldTitle small{font-size:12px;color:#a8bfdc;font-weight:400}
+.astroEventFoldMeta{display:inline-flex;align-items:center;gap:10px;color:#a9c7e9;font-size:12px;font-weight:400;white-space:nowrap}
+.astroEventChevron{display:inline-block;border-right:2px solid currentColor;border-bottom:2px solid currentColor;width:8px;height:8px;transform:rotate(45deg);transition:transform .16s ease}
+.astroEventFold[open] .astroEventChevron{transform:rotate(225deg)}
+.astroEventFoldBody{padding:0 13px 12px;border-top:1px solid #344965}
+.astroEventFoldBody .eventTimeline{margin-top:6px}
+
 .eventTimeline .event{padding:11px 0}
 .eventTimeline .event h3{font-size:15px;margin:5px 0 6px;color:#dce9ff}
 .eventTimeline .event p{font-size:13px;color:#bbcee8;line-height:1.7;margin:4px 0}
@@ -152,7 +164,8 @@ window.addEventListener('error',function(ev){
 <section id="myMap" class="sectionNav"><div class="panel"><h2 class="sectionTitle">🗺️ マイ観測・夜景マップ</h2><p class="detail">「行った」「お気に入り」「観測写真あり」のスポットを地図で確認。記録は現在のブラウザに保存されます。</p>
 <div class="npMapControls"><label>表示対象 <select id="npMapFilter" class="control"><option value="all">記録したすべて</option><option value="visited">✓ 行った</option><option value="favorite">★ お気に入り</option><option value="photos">📷 写真あり</option></select></label><label>種類 <select id="npMapCategory" class="control"><option value="all">すべて</option><option value="星空">🌌 星空（両方を含む）</option><option value="夜景">🌃 夜景（両方を含む）</option></select></label><label>名称検索 <input id="npMapSearch" class="control" placeholder="スポット名・県名" type="search"></label><label>並び順 <select id="npMapSort" class="control"><option value="name">名称順</option><option value="category">種類順</option><option value="pref">都道府県順</option></select></label><label>地方 <select id="npMapRegion" class="control"><option value="">全国</option></select></label><button class="smallbtn" id="npMapRefresh">↻ 表示を更新</button></div>
 <div id="npMapSummary" class="detail" role="status"></div><div id="npMapCanvas" aria-label="訪問・お気に入り・写真の記録地図"></div><p class="hint">地図はOpenStreetMapの地図タイルを利用。スポットの座標には都道府県の代表点などの概算値が含まれます。正確な経路・駐車場の位置は目的地の案内で確認してください。</p><div id="npMapList" class="npMapList"></div></div></section>
-<section id="sky" class="sectionNav"><div class="panel"><div class="datebar"><strong>📅 観測する日</strong><input type="date" id="date" class="control"><button class="smallbtn" id="today">今日に戻す</button></div><div class="astroGrid"><section class="panel" style="box-shadow:none"><h2 class="sectionTitle">🌙 月齢と月明かり</h2><div class="moonCard"><div class="moonIcon" id="moonIcon">🌘</div><div><div id="moonName" style="font-weight:800;font-size:20px"></div><div id="moonAge" class="meta"></div><p id="moonAdvice" class="detail"></p></div></div><section class="npSection"><h3>🌑 月齢・天の川観測カレンダー</h3><div id="npMoonCalendar"></div><p class="hint">月の輝面率による簡易評価。月出・月没は考慮していません。</p></section><div class="alert">月齢と照明率は簡易計算による参考値。月出・月没時刻、正確な月の位置は国立天文台で確認してください。</div></section><section class="panel" style="box-shadow:none"><h2 class="sectionTitle">✨ 選択日の見どころ</h2><div id="events"></div><section class="npSection"><h3>🔭 選択日に見える星座・天体の目安</h3><div id="npTargets"></div></section><h3 class="eventPeriodTitle">📅 今月の天体現象</h3><div id="monthEvents" class="eventTimeline"></div><h3 class="eventPeriodTitle">🔭 今後3か月以内の天体現象</h3><div id="quarterEvents" class="eventTimeline"></div><p class="hint">天体現象は日本時間の概略を表示しています。流星群の極大や観望条件は年ごとに変わります。彗星などの突発現象は専門サイトで最新情報をご確認ください。</p></section></div>
+<section id="sky" class="sectionNav"><div class="panel"><div class="datebar"><strong>📅 観測する日</strong><input type="date" id="date" class="control"><button class="smallbtn" id="today">今日に戻す</button></div><div class="astroGrid"><section class="panel" style="box-shadow:none"><h2 class="sectionTitle">🌙 月齢と月明かり</h2><div class="moonCard"><div class="moonIcon" id="moonIcon">🌘</div><div><div id="moonName" style="font-weight:800;font-size:20px"></div><div id="moonAge" class="meta"></div><p id="moonAdvice" class="detail"></p></div></div><section class="npSection"><h3>🌑 月齢・天の川観測カレンダー</h3><div id="npMoonCalendar"></div><p class="hint">月の輝面率による簡易評価。月出・月没は考慮していません。</p></section><div class="alert">月齢と照明率は簡易計算による参考値。月出・月没時刻、正確な月の位置は国立天文台で確認してください。</div></section><section class="panel" style="box-shadow:none"><h2 class="sectionTitle">✨ 選択日の見どころ</h2><div id="events"></div><section class="npSection"><h3>🔭 選択日に見える星座・天体の目安</h3><div id="npTargets"></div></section><details class="astroEventFold" id="monthEventFold"><summary><span class="astroEventFoldTitle">📅 1か月分の天体現象 <small>（選択月）</small></span><span class="astroEventFoldMeta"><span id="monthEventCount">確認中</span><span class="astroEventChevron" aria-hidden="true"></span></span></summary><div class="astroEventFoldBody"><div id="monthEvents" class="eventTimeline"></div></div></details>
+<details class="astroEventFold" id="quarterEventFold"><summary><span class="astroEventFoldTitle">🔭 今後3か月以内の天体現象</span><span class="astroEventFoldMeta"><span id="quarterEventCount">確認中</span><span class="astroEventChevron" aria-hidden="true"></span></span></summary><div class="astroEventFoldBody"><div id="quarterEvents" class="eventTimeline"></div></div></details><p class="hint">天体現象は日本時間の概略を表示しています。流星群の極大や観望条件は年ごとに変わります。彗星などの突発現象は専門サイトで最新情報をご確認ください。</p></section></div>
 <div class="panel" style="margin-top:15px;box-shadow:none" id="forecastPanel">
   <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px"><div><h2 class="sectionTitle">☁️ 全国の星空観測に適した天気予報 <span style="font-size:11px;color:#a6c9f7">v18.0</span></h2><p class="subtle">選択した日付の19時〜翌3時（日本時間）を、12地方の代表地点で比較します。</p></div><button class="smallbtn" id="weatherRefresh">↻ 予報を更新</button></div>
   <p id="forecastStatus" class="detail" role="status">予報を取得していません。</p>
@@ -539,6 +552,7 @@ function renderUpcomingEvents(refDate){
  panels.forEach(panel=>{
   const box=$('#'+panel.id);if(!box)return;
   box.replaceChildren();const events=collectedSkyEvents(panel.from,panel.to);
+  const count=$('#'+(panel.id==='monthEvents'?'monthEventCount':'quarterEventCount'));if(count)count.textContent=events.length+'件';
   if(!events.length){const p=document.createElement('p');p.className='hint';p.textContent='現在収録している確定的な天文現象はありません。最新の国立天文台の暦もご確認ください。';box.append(p)}
   else events.forEach(e=>box.append(timelineCard(e,refDate)));
  });
