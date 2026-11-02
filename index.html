@@ -137,12 +137,27 @@ window.addEventListener('error',function(ev){
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin="" defer></script>
 <style>.npMapControls{display:flex;gap:12px;flex-wrap:wrap;align-items:end;margin:16px 0}.npMapControls label{font-size:13px;display:grid;gap:5px}.npMapControls .control{min-width:165px}#npMapCanvas{height:460px;width:100%;border-radius:14px;background:#15223a;border:1px solid #344964}.npMapList{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:9px;margin-top:14px}.npMapItem{padding:12px;border:1px solid #3a506a;border-radius:11px;background:#16263d}.npMapItem strong{display:block;margin-bottom:5px}.npMapItem p{font-size:12px;margin:4px 0;color:#b6cbe8}.npMapItem button{margin-top:7px}.npPin{border:2px solid white;border-radius:50%;box-shadow:0 0 0 2px #24354b;background:#77b9ff;width:14px;height:14px}.npPin.star{background:#e5ba69}.npPin.city{background:#ba9df5}.npMapTip{color:#b0c5e2}.npMapEmoji{display:inline-flex;align-items:center;justify-content:center;border:1px solid #9ab7da;border-radius:12px;padding:4px 6px;background:#12243c;white-space:nowrap;font-size:18px;box-shadow:0 2px 10px #0008}@media(max-width:600px){#npMapCanvas{height:350px}}</style>
+<style>
+/* Accessible image lightbox — personal observation photos, destination images, constellation art. */
+#npZoomDialog{width:min(96vw,1150px);max-width:96vw;max-height:96dvh;box-sizing:border-box;border:1px solid #516d94;border-radius:16px;padding:10px;background:#0b1526;color:#e6f2ff;box-shadow:0 20px 80px #000d;overflow:hidden}
+#npZoomDialog::backdrop{background:rgba(0,0,0,.88)}
+.npZoomTop{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px;padding:0 3px}
+#npZoomCaption{font-size:13px;line-height:1.5;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#npZoomClose{border:1px solid #6884ac;border-radius:10px;padding:8px 12px;color:#fff;background:#263e5e;flex:none;cursor:pointer;min-width:44px}
+#npZoomViewport{display:grid;place-items:center;overflow:auto;max-height:calc(96dvh - 80px);min-height:110px;border-radius:10px;background:#060b16}
+#npZoomViewport img,#npZoomViewport svg{display:block;width:auto;max-width:100%;height:auto;max-height:calc(96dvh - 100px);object-fit:contain}
+#npZoomViewport svg{width:min(100%,1000px)}
+.npGallery img,.spotPreviewStage img,.constArt img,.constArt svg{cursor:zoom-in}
+.npGallery img:focus-visible,.spotPreviewStage img:focus-visible,.constArt img:focus-visible,.constArt svg:focus-visible{outline:3px solid #a0d1ff;outline-offset:2px}
+.stat a{color:#b7d9ff;text-decoration:underline;text-underline-offset:3px;font-size:clamp(13px,2vw,18px);line-height:1.45}
+@media(max-width:600px){#npZoomDialog{padding:8px;width:98vw;max-width:98vw;border-radius:12px}}
+</style>
 </head><body><main><header><h1>✦ NOCTRAIL <span id="npLiveVersion" style="font-size:14px;color:#abc5ea">バージョン確認中</span></h1><p>全国47都道府県の星空・夜景スポットを大幅拡充。移動時間と今夜の空から、行き先を決める。</p><p style="font-size:12px;margin:9px 0 0"><a id="npReloadLatest" href="./" style="color:#b9d6ff">↻ 最新版を読み込み直す</a>　・　<a href="./version.html" style="color:#b9d6ff">公開バージョンを確認</a></p></header>
 <div id="npEnvironmentCheck" role="alert"><strong>⚠ HTMLプレビューでは操作できない可能性があります</strong>
 画面は表示されていますが、抽選・星座図鑑・天気予報を動かすJavaScriptが起動していません。<b>ChatGPTのファイルプレビューやiPhoneの「ファイル」アプリで開いている場合</b>、HTML表示だけできて操作が動かないことがあります。Safariで開けるようにWebサイトとして公開するか、JavaScript対応HTMLビューアで開いてください。プルダウンだけ反応するのはこの状態の典型例です。</div>
 <nav><button class="active" data-view="draw">🎲 スポット抽選</button><button data-view="sky">🔭 今日の天体・月齢</button><button data-view="myMap">🗺️ マイ観測・夜景マップ</button><button data-view="community">💬 みんなの投稿</button></nav>
 <section id="draw" class="sectionNav active"><div class="layout"><aside class="panel">
-<div class="field"><label>出発地点（所要時間の基準）</label><select id="origin" class="control"><option value="toy">豊洲駅（東京）</option><option value="tok">東京駅</option><option value="shi">新宿駅</option><option value="osa">大阪駅</option><option value="nag">名古屋駅</option><option value="hak">博多駅</option><option value="sap">札幌駅</option><option value="loc">現在地を取得</option></select><div id="originHint" class="minor">道路距離を推定した概算時間です。渋滞・高速利用条件は未反映。</div></div>
+<div class="field"><label>出発地点（所要時間の基準）</label><select id="origin" class="control"><option value="toy">豊洲駅（東京）</option><option value="tok">東京駅</option><option value="shi">新宿駅</option><option value="osa">大阪駅</option><option value="nag">名古屋駅</option><option value="hak">博多駅</option><option value="sap">札幌駅</option><option value="loc">現在地を取得</option></select><div id="originHint" class="minor">移動時間フィルターは概算です。当選後Googleマップで実際の車移動時間・経路を確認できます。</div></div>
 <div class="field"><label>目的</label><div class="chips" id="typeChips"><button class="chip active" data-type="すべて">✨ 両方</button><button class="chip" data-type="星空">🌌 星空</button><button class="chip" data-type="夜景">🌃 夜景</button></div></div>
 <div class="field"><label>エリア（大まかな地方別）</label><select id="region" class="control"><option value="">全国すべて</option></select></div>
 <div class="field" id="recordFilterArea"><label>📍 訪問記録から絞り込む</label><div class="recordFilters" id="recordFilters"><button type="button" class="active" data-record="all">すべて</button><button type="button" data-record="favorite">★ お気に入り</button><button type="button" data-record="visited">✓ 行った</button><button type="button" data-record="unvisited">未訪問</button></div><p class="hint" id="recordSummary">このSafari内で記録します。</p></div>
@@ -324,7 +339,7 @@ const regions={"北海道": ["北海道"], "東北": ["青森", "岩手", "宮�
 Object.keys(regions).forEach(r=>{const o=document.createElement('option');o.value=o.textContent=r;$('#region').appendChild(o)});
 $$('nav button').forEach(b=>b.onclick=()=>{$$('nav button').forEach(x=>x.classList.toggle('active',x===b));$$('.sectionNav').forEach(x=>x.classList.toggle('active',x.id===b.dataset.view));if(b.dataset.view==='sky'){renderSky();if(!window.__npSkyReady){window.__npSkyReady=true;drawConstellation()}fetchWeather()}});
 $$('#typeChips .chip').forEach(b=>b.onclick=()=>{type=b.dataset.type;$$('#typeChips .chip').forEach(x=>x.classList.toggle('active',x===b));renderList()});
-$('#origin').onchange=()=>{let v=$('#origin').value;if(v==='loc'){if(!navigator.geolocation){$('#originHint').textContent='現在地の取得に非対応です。';return}$('#originHint').textContent='現在地を取得中…（ブラウザの許可が必要）';navigator.geolocation.getCurrentPosition(p=>{origin=[p.coords.latitude,p.coords.longitude,'現在地'];$('#originHint').textContent='現在地基準で概算しました。正確なルートではありません。';renderList()},e=>{$('#originHint').textContent='取得できませんでした。HTTPSでの利用が必要な場合があります。';$('#origin').value='toy';origin=[...originPoints.toy];renderList()},{timeout:9000})}else{origin=[...originPoints[v]];$('#originHint').textContent='道路距離を推定した概算時間です。渋滞・高速利用条件は未反映。';renderList()}};
+$('#origin').onchange=()=>{let v=$('#origin').value;if(v==='loc'){if(!navigator.geolocation){$('#originHint').textContent='現在地の取得に非対応です。';return}$('#originHint').textContent='現在地を取得中…（ブラウザの許可が必要）';navigator.geolocation.getCurrentPosition(p=>{origin=[p.coords.latitude,p.coords.longitude,'現在地'];$('#originHint').textContent='現在地基準で概算しました。正確なルートではありません。';renderList()},e=>{$('#originHint').textContent='取得できませんでした。HTTPSでの利用が必要な場合があります。';$('#origin').value='toy';origin=[...originPoints.toy];renderList()},{timeout:9000})}else{origin=[...originPoints[v]];$('#originHint').textContent='抽選用の概算です。選ばれたスポットの車移動時間・経路はGoogleマップで確認できます。';renderList()}};
 $('#region').onchange=renderList;
 document.querySelectorAll('#recordFilters button').forEach(b=>b.onclick=()=>{recordView=b.dataset.record;document.querySelectorAll('#recordFilters button').forEach(x=>x.classList.toggle('active',x===b));renderList()});
 let sliderTimer;
@@ -336,7 +351,7 @@ function updateTimeRangeUI(){
  const min=Number(minTimeSlider.value),max=Number(maxTimeSlider.value);
  $('#minTimeValue').textContent=formatTimeRangeHours(min);
  $('#maxTimeValue').textContent=formatTimeRangeHours(max);
- $('#timeRangeCaption').textContent=formatTimeRangeHours(min)+'〜'+formatTimeRangeHours(max)+'のスポットから抽選';
+ $('#timeRangeCaption').textContent=formatTimeRangeHours(min)+'〜'+formatTimeRangeHours(max)+'の範囲で抽選（概算。実際の車移動時間はGoogleで確認）';
  const track=$('#timeRangeSelected');
  track.style.left=(min/12*100)+'%';
  track.style.width=((max-min)/12*100)+'%';
@@ -365,7 +380,7 @@ function fmt(h){if(h<1)return '約'+Math.max(10,Math.round(h*60/10)*10)+'分';co
 function pool(){const lo=Number($('#minTime').value),hi=Number($('#maxTime').value),region=$('#region').value;return spots.filter(s=>(!region||regions[region].includes(s.pref))&&(type==='すべて'||type===s.type)&&(hours(s)>=lo)&&(hours(s)<=hi)&&(recordView==='all'||(recordView==='favorite'&&spotRecord(s).favorite)||(recordView==='visited'&&spotRecord(s).visited)||(recordView==='unvisited'&&!spotRecord(s).visited)))}
 function renderList(){
  const candidates=pool();
- $('#count').textContent='抽選対象：'+candidates.length+'か所 / 全'+spots.length+'か所（移動時間は概算）';
+ $('#count').textContent='抽選対象：'+candidates.length+'か所 / 全'+spots.length+'か所（絞り込みは直線距離に基づく目安。選定後Googleマップで確認）';
  const tally=recordTally();
  $('#recordSummary').textContent='記録：★ お気に入り '+tally.favorite+'件 ／ ✓ 行った '+tally.visited+'件（この端末内に保存）';
  $('#drawBtn').disabled=!candidates.length;
@@ -461,22 +476,24 @@ const verifiedAccess={
 function verifiedAccessFor(s){return verifiedAccess[spotRecordKey(s)]||null}
 function parkingDestinationLink(s){const v=verifiedAccessFor(s);return 'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(v?.parkingQuery||s.pref+' '+s.name+' 駐車場')}
 function show(s){
- selected=s;const h=hours(s);$('#result').replaceChildren();
+ selected=s;$('#result').replaceChildren();
  const hero=document.createElement('div');
- hero.innerHTML='<div class="eyebrow">YOUR DESTINATION ✦</div><h2 class="winner"></h2><div class="meta"></div><div class="media"></div><div class="stats"><div class="stat"><strong></strong><small>推定車移動時間</small></div><div class="stat"><strong></strong><small>直線距離（参考）</small></div><div class="stat"><strong></strong><small>星空の暗さ目安 / 5</small></div></div><div class="spotIntro"><h3>このスポットの見どころ</h3><p class="detail"></p></div><p class="alert">所要時間は高速道路・フェリー・渋滞を考慮しない概算です。現地の夜間立入可否、駐車、交通規制と天候を確認してください。</p><div class="buttons"><a target="_blank" rel="noopener noreferrer" id="dir">Googleマップで経路を見る ↗</a><a target="_blank" rel="noopener noreferrer" id="photoLink">Googleマップの写真を見る ↗</a><button id="skyGo">今日の星空情報を見る</button></div>';
+ hero.innerHTML='<div class="eyebrow">YOUR DESTINATION ✦</div><h2 class="winner"></h2><div class="meta"></div><div class="media"></div><div class="stats"><div class="stat"><strong><a id="routeEta" href="#" target="_blank" rel="noopener noreferrer">Googleマップで確認 ↗</a></strong><small>車での所要時間・経路</small></div><div class="stat"><strong></strong><small>直線距離（参考）</small></div><div class="stat"><strong></strong><small>星空の暗さ目安 / 5</small></div></div><div class="spotIntro"><h3>このスポットの見どころ</h3><p class="detail"></p></div><p class="alert">抽選前の所要時間フィルターは直線距離に基づく概算です。当選後はGoogleマップで道路ルート・所要時間・渋滞を確認してください。離島・フェリー利用時など、車だけで行けない場所もあります。夜間立入可否や駐車場も確認してください。</p><div class="buttons"><a target="_blank" rel="noopener noreferrer" id="dir">Googleマップで車の所要時間・経路を見る ↗</a><a target="_blank" rel="noopener noreferrer" id="photoLink">Googleマップの写真を見る ↗</a><button id="skyGo">今日の星空情報を見る</button></div>';
  hero.querySelector('.winner').textContent=s.name;
  hero.querySelector('.meta').textContent=s.pref+' ・ '+s.type;
  const stats=hero.querySelectorAll('.stat strong');
- stats[0].textContent=fmt(h);
+ // Selected destination: live driving time is shown by Google Maps, not the straight-line heuristic.
  stats[1].textContent=s.approx?'—':Math.round(km(origin[0],origin[1],s.lat,s.lon))+'km';
  stats[2].textContent='★'.repeat(s.sky)+'☆'.repeat(5-s.sky);
- hero.querySelector('.detail').textContent=makeSpotIntro(s)+(s.approx?' ※移動時間は県の代表地点を使った粗い推定で、目的地の実際の位置・移動時間とは異なります。':'');
+ hero.querySelector('.detail').textContent=makeSpotIntro(s)+(s.approx?' ※表示位置は概算です。Googleマップで正確な目的地を確認してください。':'');
  if(s.source){
   const ref=document.createElement('p');ref.className='ref';
   const a=document.createElement('a');a.href=s.source;a.target='_blank';a.rel='noopener noreferrer';a.textContent='参考サイトで詳細を見る ↗';ref.append(a);hero.querySelector('.spotIntro').append(ref);
  }
  const dest=s.approx?s.name+' '+s.pref:s.lat+','+s.lon;
- hero.querySelector('#dir').href='https://www.google.com/maps/dir/?api=1&origin='+encodeURIComponent(origin[0]+','+origin[1])+'&destination='+encodeURIComponent(dest)+'&travelmode=driving';
+ const googleRouteUrl='https://www.google.com/maps/dir/?api=1&origin='+encodeURIComponent(origin[0]+','+origin[1])+'&destination='+encodeURIComponent(dest)+'&travelmode=driving';
+ hero.querySelector('#dir').href=googleRouteUrl;
+ hero.querySelector('#routeEta').href=googleRouteUrl;
  hero.querySelector('#photoLink').href=googlePlaceLink(s);
  hero.querySelector('#skyGo').onclick=()=>$('nav button[data-view="sky"]').click();
  $('#result').append(hero);
@@ -1084,5 +1101,55 @@ document.documentElement.classList.add('np-ready');
   el.title='GitHub最終更新コミット: '+d.sha;
  }).catch(()=>{el.textContent=fallback;el.title='バージョン確認に失敗しました'});
  if(reload)reload.addEventListener('click',e=>{e.preventDefault();const url=new URL(window.location.href);url.searchParams.set('refresh',Date.now().toString());window.location.assign(url.toString())});
+})();
+</script>
+<script>
+/* Full-screen image viewer: no photos are uploaded; the existing private album stays local. */
+(function(){
+ const dialog=document.createElement('dialog');dialog.id='npZoomDialog';
+ const head=document.createElement('div');head.className='npZoomTop';
+ const title=document.createElement('span');title.id='npZoomCaption';
+ const close=document.createElement('button');close.id='npZoomClose';close.type='button';close.textContent='✕ 閉じる';close.setAttribute('aria-label','拡大表示を閉じる');
+ head.append(title,close);
+ const viewport=document.createElement('div');viewport.id='npZoomViewport';
+ dialog.append(head,viewport);document.body.append(dialog);
+ let lastFocused=null;
+ const dismiss=()=>{if(dialog.open)dialog.close()};
+ close.addEventListener('click',dismiss);
+ dialog.addEventListener('click',event=>{if(event.target===dialog)dismiss()});
+ dialog.addEventListener('close',()=>{viewport.replaceChildren();if(lastFocused?.isConnected)lastFocused.focus({preventScroll:true})});
+ function open(node){
+  viewport.replaceChildren();
+  const target=node.cloneNode(true);
+  target.removeAttribute('tabindex');target.removeAttribute('role');
+  target.removeAttribute('aria-label');
+  if(target.tagName.toLowerCase()==='img'){
+   target.loading='eager';
+   target.style.cssText='display:block;width:auto;max-width:100%;height:auto;max-height:calc(96dvh - 100px);object-fit:contain';
+  }else{
+   target.style.cssText='display:block;width:min(100%,1000px);height:auto;max-height:calc(96dvh - 100px)';
+  }
+  viewport.append(target);
+  title.textContent=node.getAttribute('alt')||node.getAttribute('aria-label')||'イラストを拡大表示';
+  lastFocused=node;
+  if(!dialog.open){if(typeof dialog.showModal==='function')dialog.showModal();else dialog.setAttribute('open','')}
+  close.focus({preventScroll:true});
+ }
+ function zoomTarget(el){
+  if(!el||typeof el.closest!=='function')return null;
+  const image=el.closest('img,svg');
+  if(!image)return null;
+  if(image.closest('#npZoomDialog'))return null;
+  if(image.matches('img')&&image.closest('.npGallery,.spotPreviewStage,.constArt'))return image;
+  if(image.matches('svg')&&image.closest('.constArt'))return image;
+  return null;
+ }
+ document.addEventListener('click',e=>{const item=zoomTarget(e.target);if(item){e.preventDefault();open(item)}});
+ // Keyboard activation for artwork even when elements are generated by the constellation gacha.
+ document.addEventListener('focusin',e=>{const item=zoomTarget(e.target);if(item){item.setAttribute('tabindex','0');item.setAttribute('role','button');item.setAttribute('aria-label',(item.getAttribute('alt')||item.getAttribute('aria-label')||'画像')+'を拡大する')}});
+ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&dialog.open)dismiss();if((e.key==='Enter'||e.key===' ')&&zoomTarget(e.target)){e.preventDefault();open(zoomTarget(e.target))}});
+ // Set keyboard semantics on already-rendered images and new ones without replacing localStorage data.
+ const observer=new MutationObserver(records=>{for(const r of records){for(const n of r.addedNodes){if(n.nodeType!==1)continue;for(const image of [n,...n.querySelectorAll('img,svg')]){if(!image.matches('img,svg'))continue;if(!zoomTarget(image))continue;image.tabIndex=0;image.setAttribute('role','button');const label=image.getAttribute('alt')||image.getAttribute('aria-label')||'画像';image.setAttribute('aria-label',label+'を拡大する')}}}});
+ observer.observe(document.querySelector('#draw')?.parentElement||document.body,{childList:true,subtree:true});
 })();
 </script></body></html>
