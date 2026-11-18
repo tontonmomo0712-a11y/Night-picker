@@ -182,12 +182,12 @@ window.addEventListener('error',function(ev){
 <section id="sky" class="sectionNav"><div class="panel"><div class="datebar"><strong>📅 観測する日</strong><input type="date" id="date" class="control"><button class="smallbtn" id="today">今日に戻す</button></div><div class="astroGrid"><section class="panel" style="box-shadow:none"><h2 class="sectionTitle">🌙 月齢と月明かり</h2><div class="moonCard"><div class="moonIcon" id="moonIcon">🌘</div><div><div id="moonName" style="font-weight:800;font-size:20px"></div><div id="moonAge" class="meta"></div><p id="moonAdvice" class="detail"></p></div></div><section class="npSection"><h3>🌑 月齢・天の川観測カレンダー</h3><div id="npMoonCalendar"></div><p class="hint">月の輝面率による簡易評価。月出・月没は考慮していません。</p></section><div class="alert">月齢と照明率は簡易計算による参考値。月出・月没時刻、正確な月の位置は国立天文台で確認してください。</div></section><section class="panel" style="box-shadow:none"><h2 class="sectionTitle">✨ 選択日の見どころ</h2><div id="events"></div><section class="npSection"><h3>🔭 選択日に見える星座・天体の目安</h3><div id="npTargets"></div></section><details class="astroEventFold" id="monthEventFold"><summary><span class="astroEventFoldTitle">📅 1か月分の天体現象 <small>（選択月）</small></span><span class="astroEventFoldMeta"><span id="monthEventCount">確認中</span><span class="astroEventChevron" aria-hidden="true"></span></span></summary><div class="astroEventFoldBody"><div id="monthEvents" class="eventTimeline"></div></div></details>
 <details class="astroEventFold" id="quarterEventFold"><summary><span class="astroEventFoldTitle">🔭 今後3か月以内の天体現象</span><span class="astroEventFoldMeta"><span id="quarterEventCount">確認中</span><span class="astroEventChevron" aria-hidden="true"></span></span></summary><div class="astroEventFoldBody"><div id="quarterEvents" class="eventTimeline"></div></div></details><p class="hint">天体現象は日本時間の概略を表示しています。流星群の極大や観望条件は年ごとに変わります。彗星などの突発現象は専門サイトで最新情報をご確認ください。</p></section></div>
 <div class="panel" style="margin-top:15px;box-shadow:none" id="forecastPanel">
-  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px"><div><h2 class="sectionTitle">☁️ 全国の星空観測に適した天気予報 <span style="font-size:11px;color:#a6c9f7">v18.3・接続診断対応</span></h2><p class="subtle">選択した日付の19時〜翌3時（日本時間）を、12地方の代表地点で比較します。</p></div><button class="smallbtn" id="weatherRefresh">↻ 予報を更新</button></div>
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px"><div><h2 class="sectionTitle">☁️ 全国の星空観測に適した天気予報 <span style="font-size:11px;color:#a6c9f7">v18.4・予報バックアップ対応</span></h2><p class="subtle">選択した日付の19時〜翌3時（日本時間）を、12地方の代表地点で比較します。</p></div><button class="smallbtn" id="weatherRefresh">↻ 予報を更新</button></div>
   <p id="forecastStatus" class="detail" role="status">予報を取得していません。</p>
   <div class="hint" style="display:flex;align-items:center;flex-wrap:wrap;gap:9px;margin:6px 0 10px"><button id="weatherDiagnose" class="smallbtn" type="button">🔍 API接続診断</button><span id="weatherDiagResult" role="status">表示されない場合は接続診断を実行してください。</span></div>
   <div id="weatherSummary" class="detail"></div><p class="hint">観測コンディション指数：雲・雨・風に加え月明かりも考慮した100点満点の参考値。湿度や光害は未反映です。</p><div id="weatherRegions" class="weatherGrid"></div>
   <p class="hint">評価は代表地点の予測雲量・降水確率・風速から計算した参考指数です。各地方の全域を表すものではありません。街明かり、山の雲・霧、月齢、実際の現地天候は別途確認してください。遠い日付は予報が未提供です。</p>
-  <p class="src">予報データ：<a href="https://open-meteo.com/en/docs" target="_blank" rel="noopener noreferrer">Open-Meteo（時間別予報）↗</a>／気象庁：<a href="https://www.jma.go.jp/bosai/forecast/" target="_blank" rel="noopener noreferrer">最新の天気予報↗</a> ／ <a id="weatherApiTest" hidden target="_blank" rel="noopener noreferrer" href="https://open-meteo.com/en/docs">APIの応答を確認 ↗</a></p>
+  <p class="src">予報データ：<a href="https://open-meteo.com/en/docs" target="_blank" rel="noopener noreferrer">Open-Meteo（時間別予報）↗</a>／気象庁：<a href="https://www.jma.go.jp/bosai/forecast/" target="_blank" rel="noopener noreferrer">最新の天気予報↗</a> ／ <a href="https://api.met.no/" target="_blank" rel="noopener noreferrer">代替データ：MET Norway</a>（<a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0</a>、NOCTRAILで夜間集計） ／ <a id="weatherApiTest" hidden target="_blank" rel="noopener noreferrer" href="https://open-meteo.com/en/docs">APIの応答を確認 ↗</a></p>
 </div>
 <div class="panel" style="margin-top:15px;box-shadow:none"><div style="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap"><div><h2 class="sectionTitle">🌠 星座プラネタリウム図鑑・神話ガチャ</h2><p class="subtle">88星座を季節・北天/南天・黄道十二星座などから探せます。星座の絵、主な星、神話、近隣の星座、観望ガイドを解説します。</p></div><button id="nextConst" class="smallbtn">🎲 ほかの星座を観る</button></div><div class="constBrowse" aria-label="星座の分類から探す"><p class="constBrowseLabel">🔎 星座をテーマから探す</p><div class="constFilters" id="constFilters" role="group" aria-label="星座の分類">
 <button type="button" data-cat="season" class="active">🌙 今夜の季節</button><button type="button" data-cat="all">全天88星座</button><button type="button" data-cat="春">🌸 春</button><button type="button" data-cat="夏">🌻 夏</button><button type="button" data-cat="秋">🍁 秋</button><button type="button" data-cat="冬">❄️ 冬</button><button type="button" data-cat="北天">🧭 北天寄り</button><button type="button" data-cat="南天">🌏 南天寄り</button><button type="button" data-cat="zodiac">♈ 黄道十二星座</button><button type="button" data-cat="jp">国内で観測する</button><button type="button" data-cat="difficult">日本では観測困難</button>
@@ -1029,6 +1029,84 @@ const regionWeatherPoints=[
  ['東海','伊豆高原',34.90,139.10],['関西','曽爾高原',34.53,136.15],['中国','蒜山',35.28,133.60],
  ['四国','四国カルスト',33.48,133.01],['九州','阿蘇',32.88,131.08],['沖縄','石垣島',24.34,124.16]
 ];
+
+// Independent fallback provider: MET Norway Locationforecast (CC BY 4.0).
+// Only the twelve fixed regional representative coordinates are sent, never the user's GPS.
+const metNoCacheKey='night-picker:met-no:v1';
+const metNoMemoryCache={};
+function getMetNoCache(point){
+ const key=point[2].toFixed(2)+','+point[3].toFixed(2);
+ let record=metNoMemoryCache[key];
+ if(!record){
+  try{record=JSON.parse(localStorage.getItem(metNoCacheKey+':'+key)||'null');}catch(e){record=null}
+ }
+ return record?.expires>Date.now()&&record?.data?.properties?.timeseries?record.data:null;
+}
+function saveMetNoCache(point,data,expires){
+ const key=point[2].toFixed(2)+','+point[3].toFixed(2);
+ // Respect publisher's Expires header if exposed; keep a conservative minimum to limit requests.
+ const entry={data,expires:Math.max(Date.now()+3*60*60*1000,expires||0)};
+ metNoMemoryCache[key]=entry;
+ try{localStorage.setItem(metNoCacheKey+':'+key,JSON.stringify(entry));}catch(e){}
+}
+function metNoNightWeather(data,date){
+ const src=data?.properties?.timeseries;
+ if(!Array.isArray(src))return null;
+ const requested=new Set(nightTimes(date));
+ const hourly={time:[],cloud_cover:[],precipitation_probability:[],precipitation:[],wind_speed_10m:[]};
+ for(const p of src){
+  const t=Date.parse(p.time);
+  if(!Number.isFinite(t))continue;
+  const localTime=new Date(t+9*3600000).toISOString().slice(0,16);
+  if(!requested.has(localTime))continue;
+  const details=p.data?.instant?.details;
+  const cloud=details?.cloud_area_fraction,wind=details?.wind_speed;
+  if(!Number.isFinite(Number(cloud))||!Number.isFinite(Number(wind))||cloud==null||wind==null)continue;
+  const one=p.data?.next_1_hours?.details;
+  const six=p.data?.next_6_hours?.details;
+  const rain=one?.precipitation_amount??(six?.precipitation_amount==null?null:six.precipitation_amount/6);
+  hourly.time.push(localTime);
+  hourly.cloud_cover.push(Number(cloud));
+  hourly.wind_speed_10m.push(Number(wind)*3.6); // Provider wind is m/s, NOCTRAIL uses km/h
+  hourly.precipitation.push(rain==null?null:Number(rain));
+  hourly.precipitation_probability.push(null); // Not guaranteed in compact; never invent probability
+ }
+ return nightWeather({hourly},date);
+}
+async function fetchMetNoPoint(point,date){
+ const cached=getMetNoCache(point);
+ if(cached)return {region:point[0],place:point[1],data:metNoNightWeather(cached,date),source:'MET Norway'};
+ const url=new URL('https://api.met.no/weatherapi/locationforecast/2.0/compact');
+ url.searchParams.set('lat',point[2].toFixed(2));
+ url.searchParams.set('lon',point[3].toFixed(2));
+ const ctrl=new AbortController();
+ const timeout=setTimeout(()=>ctrl.abort(),10500);
+ try{
+  const response=await fetch(url.toString(),{signal:ctrl.signal,cache:'default',mode:'cors'});
+  if(!response.ok)throw Error('MET Norway HTTP '+response.status);
+  const data=await response.json();
+  if(!Array.isArray(data?.properties?.timeseries))throw Error('MET Norway のデータ形式が不正です');
+  const expires=Date.parse(response.headers?.get('expires')||'')||0;
+  saveMetNoCache(point,data,expires);
+  return {region:point[0],place:point[1],data:metNoNightWeather(data,date),source:'MET Norway'};
+ }finally{clearTimeout(timeout)}
+}
+async function tryMetNoFallback(date,missing,requestId,onBatch){
+ // MET Norway gives about nine days, not the 16-day Open-Meteo horizon.
+ const today=new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+ const diff=Math.round((Date.parse(date+'T12:00:00+09:00')-Date.parse(today+'T12:00:00+09:00'))/86400000);
+ if(diff>8)return {rows:[],reason:'代替データの予報期間（約9日間）を超えています'};
+ const rows=[],errors=[];
+ // At most 3 concurrent requests, cache responses across dates and page views.
+ for(let i=0;i<missing.length;i+=3){
+  if(requestId!==weatherRequestId)break;
+  const slice=missing.slice(i,i+3);
+  const results=await Promise.allSettled(slice.map(x=>fetchMetNoPoint(x,date)));
+  results.forEach((x,j)=>{if(x.status==='fulfilled')rows.push(x.value);else errors.push(weatherFailureLabel(x.reason))});
+  if(typeof onBatch==='function')onBatch(rows,errors);
+ }
+ return {rows,reason:[...new Set(errors)].slice(0,2).join('、')};
+}
 // 天気予報: 必要な日付と地点だけ取得し、通信が遅い端末でも結果を段階表示する。
 let weatherRequestId=0, weatherCache={};
 let activeWeatherControllers=[];
@@ -1074,7 +1152,7 @@ function showWeatherResults(date,rows){
   const badge=document.createElement('span');badge.className='weatherTag';badge.textContent=tag;head.append(b,badge);
   const metric=document.createElement('div');metric.className='weatherMetrics';
   metric.textContent=v?`観測指数 ${Math.max(0,Math.round(v.score-lunar(date).illum*18))}/100点 ／ 雲量平均 ${v.cloud}% ／ ${v.precip!==null?'最大降水確率 '+v.precip+'%':v.rain!==null?'最大時間雨量 '+v.rain+'mm':'降水データなし'} ／ 風速平均 ${v.wind}km/h`:'対象時間の予報を取得できません';
-  const note=document.createElement('div');note.className='weatherDetails';note.textContent=`代表地点：${x.place}${v?` ／ ${v.n}/9時間を評価${v.limited?'（一部時間のみ）':''}`:''}`;
+  const note=document.createElement('div');note.className='weatherDetails';note.textContent=`代表地点：${x.place}${v?` ／ ${v.n}/9時間を評価${v.limited?'（一部時間のみ）':''}`:''}${x.source?' ／ 出典：'+x.source:''}`;
   card.append(head,metric,note);root.append(card);
  }
 }
@@ -1179,16 +1257,34 @@ async function fetchWeather(force=false){
    if(req!==weatherRequestId)return;
    errors.push('一括取得：'+weatherFailureLabel(e));
    // If throttled, don't immediately issue another burst of requests.
-   if(!/HTTP 429/.test(String(e?.message||'')))await Promise.all(groups.map(fetchEachGroup));
+   if(e?.name!=='AbortError'&&!/HTTP 429|Failed to fetch|NetworkError|Load failed|fetch failed/i.test(String(e?.message||'')))await Promise.all(groups.map(fetchEachGroup));
   }
   if(req!==weatherRequestId)return;
+  let backupCount=0;
+  const missing=regionWeatherPoints.filter(p=>!results.some(x=>x.region===p[0]&&x.data));
+  let backupReason='';
+  if(missing.length){
+   status.textContent='Open-Meteoから取得できなかったため、MET Norwayの代替予報を確認中…';
+   const fallback=await tryMetNoFallback(date,missing,req,(received,failures)=>{
+    if(req!==weatherRequestId)return;
+    for(const item of received){
+     const i=results.findIndex(x=>x.region===item.region);
+     if(i>=0&&item.data)results[i]=item;
+    }
+    showWeatherResults(date,results);
+    status.textContent='代替予報を取得中：'+results.filter(x=>x.data).length+'/12地方';
+   });
+   if(req!==weatherRequestId)return;
+   backupReason=fallback.reason||'';
+   backupCount=results.filter(x=>x.source==='MET Norway'&&x.data).length;
+  }
   const valid=results.filter(x=>x.data).length;
   if(valid)weatherCache[date]={rows:results,at:Date.now()};
   const updated=new Intl.DateTimeFormat('ja-JP',{timeZone:'Asia/Tokyo',hour:'2-digit',minute:'2-digit'}).format(new Date());
   const failures=[...new Set(errors)].slice(0,2).join('、');
-  if(valid===12)status.textContent=`予報取得完了：${updated}（日本時間）｜12地方｜出典 Open-Meteo。`;
-  else if(valid)status.textContent=`一部取得：${valid}/12地方（${updated}）${failures?' ／ 未取得の原因：'+failures:''}。予報を更新すると再取得します。`;
-  else status.textContent=`予報を取得できませんでした。${failures?'原因：'+failures+'。':''}日付が今日から15日以内か確認し、「予報を更新」を押してください。下の気象庁やAPI確認リンクも利用できます。`;
+  if(valid===12)status.textContent=`予報取得完了：${updated}（日本時間）｜12地方｜${backupCount?`代替MET Norway ${backupCount}地方を含む。降水確率は一部非提供。`:'出典 Open-Meteo。'}`;
+  else if(valid)status.textContent=`一部取得：${valid}/12地方（${updated}）${backupCount?' ／ MET Norway代替 '+backupCount+'地方':''}${failures?' ／ Open-Meteo：'+failures:''}。`;
+  else status.textContent=`Open-MeteoとMET Norwayの両方から予報を取得できませんでした。${failures?'Open-Meteo：'+failures+'。':''}${backupReason?'代替：'+backupReason+'。':''}気象庁リンクで確認してください。`;
   // Provide a direct API diagnostic URL; don't synthesize weather values when loading fails.
   const test=document.querySelector('#weatherApiTest');
   if(test){test.href=makeWeatherURL([regionWeatherPoints[3]],date,true);test.hidden=false;}
