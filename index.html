@@ -1133,8 +1133,12 @@ async function fetchWeather(force=false){
   try{got=await fetchWeatherGroup(g.points,date,req,false)}
   catch(e){
    if(req!==weatherRequestId)return;
-   // 1回の失敗で全地方が取得不可になるのを防ぐ。軽い項目で2地点ずつ再試行。
+   // Do not hammer a throttled service or retry a permanently invalid request.
    errors.push(weatherFailureLabel(e));
+   if(/HTTP (400|401|403|404|429)/.test(String(e?.message||''))){
+    got=g.points.map(p=>({region:p[0],place:p[1],data:null}));
+   }else{
+   // 一括取得に失敗した場合だけ、2地点→1地点へ段階的に再試行する。
    const pairs=[g.points.slice(0,2),g.points.slice(2,4)];
    // A single bad coordinate must not invalidate the other regions.
    // If a two-point request fails, retry each location individually before giving up.
@@ -1149,6 +1153,7 @@ async function fetchWeather(force=false){
    };
    const retry=await Promise.allSettled(pairs.map(retryPair));
    got=retry.flatMap((r,i)=>r.status==='fulfilled'?r.value:(errors.push(weatherFailureLabel(r.reason)),pairs[i].map(p=>({region:p[0],place:p[1],data:null}))));
+   }
   }
   if(req!==weatherRequestId)return;
   got.forEach(x=>{const ix=results.findIndex(r=>r.region===x.region);if(ix>=0)results[ix]=x});
