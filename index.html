@@ -182,8 +182,9 @@ window.addEventListener('error',function(ev){
 <section id="sky" class="sectionNav"><div class="panel"><div class="datebar"><strong>📅 観測する日</strong><input type="date" id="date" class="control"><button class="smallbtn" id="today">今日に戻す</button></div><div class="astroGrid"><section class="panel" style="box-shadow:none"><h2 class="sectionTitle">🌙 月齢と月明かり</h2><div class="moonCard"><div class="moonIcon" id="moonIcon">🌘</div><div><div id="moonName" style="font-weight:800;font-size:20px"></div><div id="moonAge" class="meta"></div><p id="moonAdvice" class="detail"></p></div></div><section class="npSection"><h3>🌑 月齢・天の川観測カレンダー</h3><div id="npMoonCalendar"></div><p class="hint">月の輝面率による簡易評価。月出・月没は考慮していません。</p></section><div class="alert">月齢と照明率は簡易計算による参考値。月出・月没時刻、正確な月の位置は国立天文台で確認してください。</div></section><section class="panel" style="box-shadow:none"><h2 class="sectionTitle">✨ 選択日の見どころ</h2><div id="events"></div><section class="npSection"><h3>🔭 選択日に見える星座・天体の目安</h3><div id="npTargets"></div></section><details class="astroEventFold" id="monthEventFold"><summary><span class="astroEventFoldTitle">📅 1か月分の天体現象 <small>（選択月）</small></span><span class="astroEventFoldMeta"><span id="monthEventCount">確認中</span><span class="astroEventChevron" aria-hidden="true"></span></span></summary><div class="astroEventFoldBody"><div id="monthEvents" class="eventTimeline"></div></div></details>
 <details class="astroEventFold" id="quarterEventFold"><summary><span class="astroEventFoldTitle">🔭 今後3か月以内の天体現象</span><span class="astroEventFoldMeta"><span id="quarterEventCount">確認中</span><span class="astroEventChevron" aria-hidden="true"></span></span></summary><div class="astroEventFoldBody"><div id="quarterEvents" class="eventTimeline"></div></div></details><p class="hint">天体現象は日本時間の概略を表示しています。流星群の極大や観望条件は年ごとに変わります。彗星などの突発現象は専門サイトで最新情報をご確認ください。</p></section></div>
 <div class="panel" style="margin-top:15px;box-shadow:none" id="forecastPanel">
-  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px"><div><h2 class="sectionTitle">☁️ 全国の星空観測に適した天気予報 <span style="font-size:11px;color:#a6c9f7">v18.2・11/18修正版</span></h2><p class="subtle">選択した日付の19時〜翌3時（日本時間）を、12地方の代表地点で比較します。</p></div><button class="smallbtn" id="weatherRefresh">↻ 予報を更新</button></div>
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px"><div><h2 class="sectionTitle">☁️ 全国の星空観測に適した天気予報 <span style="font-size:11px;color:#a6c9f7">v18.3・接続診断対応</span></h2><p class="subtle">選択した日付の19時〜翌3時（日本時間）を、12地方の代表地点で比較します。</p></div><button class="smallbtn" id="weatherRefresh">↻ 予報を更新</button></div>
   <p id="forecastStatus" class="detail" role="status">予報を取得していません。</p>
+  <div class="hint" style="display:flex;align-items:center;flex-wrap:wrap;gap:9px;margin:6px 0 10px"><button id="weatherDiagnose" class="smallbtn" type="button">🔍 API接続診断</button><span id="weatherDiagResult" role="status">表示されない場合は接続診断を実行してください。</span></div>
   <div id="weatherSummary" class="detail"></div><p class="hint">観測コンディション指数：雲・雨・風に加え月明かりも考慮した100点満点の参考値。湿度や光害は未反映です。</p><div id="weatherRegions" class="weatherGrid"></div>
   <p class="hint">評価は代表地点の予測雲量・降水確率・風速から計算した参考指数です。各地方の全域を表すものではありません。街明かり、山の雲・霧、月齢、実際の現地天候は別途確認してください。遠い日付は予報が未提供です。</p>
   <p class="src">予報データ：<a href="https://open-meteo.com/en/docs" target="_blank" rel="noopener noreferrer">Open-Meteo（時間別予報）↗</a>／気象庁：<a href="https://www.jma.go.jp/bosai/forecast/" target="_blank" rel="noopener noreferrer">最新の天気予報↗</a> ／ <a id="weatherApiTest" hidden target="_blank" rel="noopener noreferrer" href="https://open-meteo.com/en/docs">APIの応答を確認 ↗</a></p>
@@ -1078,20 +1079,21 @@ function showWeatherResults(date,rows){
  }
 }
 function makeWeatherURL(points,date,simplified=false){
- // Minimal, documented Open-Meteo forecast request: forecast_days handles the whole
- // time window. Explicit start_date/end_date are deliberately omitted to avoid a
- // conflicting range and unexpected HTTP 400 responses.
  const url=new URL('https://api.open-meteo.com/v1/forecast');
  url.searchParams.set('latitude',points.map(x=>x[2]).join(','));
  url.searchParams.set('longitude',points.map(x=>x[3]).join(','));
- url.searchParams.set('hourly',simplified?'cloud_cover,precipitation,wind_speed_10m':'cloud_cover,precipitation_probability,precipitation,wind_speed_10m');
+ url.searchParams.set('hourly',simplified?'cloud_cover,wind_speed_10m':'cloud_cover,precipitation_probability,precipitation,wind_speed_10m');
  url.searchParams.set('timezone','Asia/Tokyo');
- url.searchParams.set('forecast_days','16');
+ // Only request as many forecast days as required for the selected evening.
+ // For tonight: 2 days rather than 16; reduces transferred data significantly.
+ const base=new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+ const n=Math.round((Date.parse(date+'T12:00:00+09:00')-Date.parse(base+'T12:00:00+09:00'))/86400000);
+ url.searchParams.set('forecast_days',String(Math.max(2,Math.min(16,n+2))));
  return url.toString();
 }
-async function fetchWeatherGroup(group,date,req,simplified=false){
+async function fetchWeatherGroup(group,date,req,simplified=false,timeoutMs=11000){
  const ctrl=new AbortController();activeWeatherControllers.push(ctrl);
- const timeout=setTimeout(()=>ctrl.abort(),10500);
+ const timeout=setTimeout(()=>ctrl.abort(),timeoutMs);
  try{
   const response=await fetch(makeWeatherURL(group,date,simplified),{signal:ctrl.signal,cache:'no-store',mode:'cors'});
   if(!response.ok){
@@ -1100,7 +1102,7 @@ async function fetchWeatherGroup(group,date,req,simplified=false){
   }
   const data=await response.json();
   const arr=Array.isArray(data)?data:[data];
-  if(arr.length!==group.length)throw Error('地点数の応答が一致しません');
+  if(arr.length!==group.length)throw Error('地点数の応答が一致しません：要求'+group.length+'地点／応答'+arr.length+'地点');
   return group.map((p,i)=>({region:p[0],place:p[1],data:nightWeather(arr[i],date)}));
  }finally{clearTimeout(timeout);activeWeatherControllers=activeWeatherControllers.filter(x=>x!==ctrl)}
 }
@@ -1167,7 +1169,18 @@ async function fetchWeather(force=false){
   status.textContent=`全国12地方の予報を取得中：${count}地方でデータを取得（${date} 19:00〜翌3:00）`;
  };
  try{
-  await Promise.all(groups.map(fetchEachGroup));
+  // A single short request is cheaper and less rate-limit-prone than parallel regional requests.
+  try{
+   const whole=await fetchWeatherGroup(regionWeatherPoints,date,req,false,7500);
+   if(req!==weatherRequestId)return;
+   whole.forEach(x=>{const i=results.findIndex(r=>r.region===x.region);if(i>=0)results[i]=x});
+   showWeatherResults(date,results);
+  }catch(e){
+   if(req!==weatherRequestId)return;
+   errors.push('一括取得：'+weatherFailureLabel(e));
+   // If throttled, don't immediately issue another burst of requests.
+   if(!/HTTP 429/.test(String(e?.message||'')))await Promise.all(groups.map(fetchEachGroup));
+  }
   if(req!==weatherRequestId)return;
   const valid=results.filter(x=>x.data).length;
   if(valid)weatherCache[date]={rows:results,at:Date.now()};
@@ -1181,6 +1194,24 @@ async function fetchWeather(force=false){
   if(test){test.href=makeWeatherURL([regionWeatherPoints[3]],date,true);test.hidden=false;}
  }catch(e){if(req!==weatherRequestId)return;status.textContent='予報の処理中に問題が発生しました：'+weatherFailureLabel(e);}
 }
+// Independent, single-point diagnostics. Keeps the exact HTTP/fetch error visible to users.
+document.querySelector('#weatherDiagnose').onclick=async()=>{
+ const btn=document.querySelector('#weatherDiagnose'),out=document.querySelector('#weatherDiagResult'),date=document.querySelector('#date').value;
+ btn.disabled=true;out.textContent='Open-Meteoに1地点だけ接続しています…';
+ const control=new AbortController(),timer=setTimeout(()=>control.abort(),12000);
+ try{
+  const url=makeWeatherURL([regionWeatherPoints[3]],date,true);
+  const resp=await fetch(url,{signal:control.signal,cache:'no-store'});
+  const data=await resp.json().catch(()=>null);
+  if(!resp.ok){out.textContent='接続診断：HTTP '+resp.status+' ／ '+String(data?.reason||'応答エラー').slice(0,130)}
+  else if(!Array.isArray(data?.hourly?.time)){out.textContent='接続診断：HTTP 200、ただし時間別データがありません（応答構造を確認）'}
+  else{
+   const match=nightWeather(data,date);
+   out.textContent=match?'接続診断：正常（HTTP 200、対象夜間'+match.n+'/9時間）。「予報を更新」を押してください。':'接続診断：HTTP 200、ただし選択日の19時〜翌3時のデータがありません。日付を確認してください。';
+  }
+ }catch(e){out.textContent='接続診断：'+weatherFailureLabel(e)+' ／ 別タブの「APIの応答を確認」も試してください。'}
+ finally{clearTimeout(timer);btn.disabled=false}
+};
 document.querySelector('#weatherRefresh').onclick=()=>fetchWeather(true);
 document.querySelector('#date').addEventListener('change',()=>{if(window.__npSkyReady)fetchWeather()});
 document.querySelector('#today').addEventListener('click',()=>{if(window.__npSkyReady)fetchWeather()});
